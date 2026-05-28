@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Loja - Food Farmer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 4rem auto;
+            background: white;
+            padding: 3rem;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        .form-control {
+            border-radius: 10px;
+            padding: 0.8rem 1.2rem;
+            border: 1px solid #eee;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <div class="container">
+        <div class="form-container">
+            <div class="text-center mb-5">
+                <div class="btn btn-primary-custom rounded-circle mb-3" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-shop fs-3"></i>
+                </div>
+                <h2 class="fw-bold" th:text="${store.id != null ? 'Editar Loja' : 'Sua Nova Loja'}">Sua Nova Loja</h2>
+                <p class="text-muted" th:text="${store.id != null ? 'Atualize os dados da sua vitrine' : 'Preencha os detalhes da sua vitrine virtual'}">Preencha os detalhes da sua vitrine virtual</p>
+            </div>
+
+            <form th:action="@{/producer/store/save}" th:object="${store}" method="post">
+                <input type="hidden" th:field="*{id}">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Nome da Loja</label>
+                    <input type="text" th:field="*{nome}" class="form-control" placeholder="Ex: Horta Orgânica do João" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Descrição Curta</label>
+                    <input type="text" th:field="*{descricao}" class="form-control" placeholder="Ex: Produtos frescos colhidos no dia" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-bold">URL da Imagem da Loja</label>
+                    <input type="url" th:field="*{urlImagem}" class="form-control" placeholder="https://exemplo.com/imagem.jpg" required>
+                    <small class="text-muted">Dica: Use uma foto bonita da sua horta ou logo.</small>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary-custom">Salvar e Continuar</button>
+                    <a th:href="@{/producer/stores}" class="btn btn-light rounded-pill">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

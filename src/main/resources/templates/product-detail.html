@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${produto.nome} + ' - Farm Food'">Produto - Farm Food</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* CSS Reset / Base Setup */
+        body { background-color: var(--light-gray, #f9f9f9); }
+        
+        .breadcrumb-item a { color: var(--primary-color); text-decoration: none; }
+        
+        /* Layout */
+        .product-section { background: #fff; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); padding: 2rem; margin-top: 1rem; }
+        
+        /* Images / Carousel */
+        .main-image-container { 
+            position: relative; 
+            border-radius: 15px; 
+            overflow: hidden; 
+            background: #f8f9fa; 
+            cursor: zoom-in;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .main-image { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            transition: transform 0.3s ease, opacity 0.2s ease; 
+        }
+        .main-image-container:hover .main-image { transform: scale(1.3); }
+        
+        .thumbnails { display: flex; gap: 10px; margin-top: 1rem; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .thumbnails::-webkit-scrollbar { display: none; }
+        .thumb-img { 
+            width: 80px; 
+            height: 80px; 
+            border-radius: 10px; 
+            object-fit: cover; 
+            cursor: pointer; 
+            border: 2px solid transparent; 
+            transition: all 0.2s;
+            opacity: 0.6;
+        }
+        .thumb-img.active, .thumb-img:hover { border-color: var(--primary-color); opacity: 1; transform: translateY(-2px); }
+        
+        /* Badges & Trust Elements */
+        .trust-badge { display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--secondary-color, #f1f8f1); border-radius: 10px; font-size: 0.9rem; margin-bottom: 10px; transition: transform 0.2s; }
+        .trust-badge:hover { transform: translateY(-2px); }
+        .trust-badge i { color: var(--primary-color); font-size: 1.5rem; }
+        
+        /* Info */
+        .product-title { font-weight: 700; font-size: 2rem; color: var(--text-color); line-height: 1.2; }
+        .store-info { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+        .store-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--secondary-color, #f1f8f1); }
+        .store-link { color: var(--text-color); text-decoration: none; font-weight: 500; transition: color 0.2s; }
+        .store-link:hover { color: var(--primary-color); }
+        
+        .price-container { margin: 1.5rem 0; display: flex; align-items: baseline; flex-wrap: wrap; }
+        .price-tag { font-size: 2.5rem; font-weight: 800; color: var(--primary-color); }
+        .original-price { text-decoration: line-through; color: #999; font-size: 1.2rem; margin-left: 15px; }
+        .discount-badge-inline { background: #ff4757; color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; margin-left: 10px; position: relative; top: -5px; }
+        
+        /* Variations */
+        .variation-selector { margin-bottom: 1.5rem; }
+        .variation-title { font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; color: var(--text-color); }
+        .variation-options { display: flex; gap: 10px; flex-wrap: wrap; }
+        .variation-btn { border: 1px solid #ddd; background: white; padding: 8px 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-weight: 500; color: var(--text-color); }
+        .variation-btn:hover, .variation-btn.active { border-color: var(--primary-color); background: var(--secondary-color, #f1f8f1); color: var(--primary-color); }
+        .variation-btn:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
+        
+        /* Quantity & Add to Cart */
+        .action-container { display: flex; gap: 15px; margin-top: 2rem; flex-wrap: wrap; }
+        .qty-selector { display: flex; align-items: center; border: 2px solid #eee; border-radius: 12px; padding: 5px; height: 55px; background: white; transition: border-color 0.2s; }
+        .qty-selector:focus-within { border-color: var(--primary-color); }
+        .qty-btn { background: none; border: none; color: var(--primary-color); font-size: 1.5rem; width: 40px; height: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; border-radius: 8px; }
+        .qty-btn:hover { background: var(--secondary-color, #f1f8f1); }
+        .qty-input { width: 50px; text-align: center; border: none; font-weight: 700; font-size: 1.1rem; background: transparent; color: var(--text-color); }
+        .qty-input:focus { outline: none; }
+        
+        .btn-add-cart { 
+            flex: 1; 
+            min-width: 200px;
+            background-color: var(--primary-color); 
+            color: white; 
+            border: none; 
+            height: 55px; 
+            border-radius: 12px; 
+            font-weight: 600; 
+            font-size: 1.1rem;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(45, 90, 39, 0.3);
+        }
+        .btn-add-cart:hover { background-color: #21421c; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(45, 90, 39, 0.4); color: white; }
+        .btn-add-cart:focus-visible { outline: 3px solid #21421c; outline-offset: 2px; }
+        
+        .btn-buy-now {
+            flex: 1;
+            min-width: 200px;
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            height: 55px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+        }
+        .btn-buy-now:hover { background-color: #e68a00; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4); color: white; }
+        .btn-buy-now:focus-visible { outline: 3px solid #e68a00; outline-offset: 2px; }
+        
+        /* Mobile Adjustments */
+        @media (max-width: 991px) {
+            .product-section { padding: 1.5rem; margin-top: 0; border-radius: 0; }
+            .main-image-container { height: 300px; border-radius: 10px; }
+            .product-title { font-size: 1.8rem; }
+            .price-tag { font-size: 2rem; }
+            
+            /* Sticky Bottom Bar for Mobile */
+            .mobile-bottom-bar {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: white;
+                padding: 15px;
+                box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+                z-index: 1000;
+                display: flex;
+                gap: 10px;
+                animation: slideUp 0.3s ease-out;
+            }
+            body { padding-bottom: 90px; }
+            .action-container { display: none; } /* Hide desktop buttons */
+            .qty-selector-mobile { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 10px; height: 50px; }
+            .qty-btn-mobile { background: none; border: none; width: 40px; height: 100%; color: var(--primary-color); font-size: 1.2rem; }
+            .qty-input-mobile { width: 40px; text-align: center; border: none; font-weight: 600; }
+            .btn-add-cart-mobile { flex: 1; background-color: var(--primary-color); color: white; border: none; border-radius: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
+            .btn-add-cart-mobile:active { background-color: #21421c; }
+        }
+        
+        @media (min-width: 992px) {
+            .mobile-bottom-bar { display: none; }
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        
+        /* Toast notification */
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1055; }
+    </style>
+</head>
+<body>
+    
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/}">
+                <i class="bi bi-basket me-2"></i>Farm Food
+            </a>
+            <div class="d-flex align-items-center">
+                <a th:href="@{/}" class="btn btn-outline-custom btn-sm d-lg-none border-0">
+                    <i class="bi bi-chevron-left"></i> Voltar
+                </a>
+                <a href="/cart" class="text-dark position-relative ms-3 d-inline-block">
+                    <i class="bi bi-cart fs-5"></i>
+                    <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; display: none; pointer-events: none;">0</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container pb-5">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mt-4 d-none d-lg-block">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}">Início</a></li>
+                <li class="breadcrumb-item"><a href="#">Produtos</a></li>
+                <li class="breadcrumb-item active" aria-current="page" th:text="${produto.nome}">Produto</li>
+            </ol>
+        </nav>
+
+        <div class="product-section">
+            <div class="row g-5">
+                <!-- Imagens -->
+                <div class="col-lg-6">
+                    <div class="main-image-container" id="image-container" aria-label="Imagem do produto com zoom no desktop">
+                        <img th:src="${produto.urlImagem}" class="main-image" id="main-image" th:alt="${produto.nome}">
+                    </div>
+                    <!-- Thumbnails (Simuladas) -->
+                    <div class="thumbnails" role="listbox" aria-label="Galeria de imagens">
+                        <img th:src="${produto.urlImagem}" class="thumb-img active" onclick="changeImage(this)" alt="Visão frontal" role="option" aria-selected="true" tabindex="0">
+                        <!-- Imagens simuladas de outras posições usando filtros -->
+                        <img th:src="${produto.urlImagem}" class="thumb-img" style="filter: brightness(0.85);" onclick="changeImage(this)" alt="Visão lateral" role="option" aria-selected="false" tabindex="0">
+                        <img th:src="${produto.urlImagem}" class="thumb-img" style="filter: saturate(1.5);" onclick="changeImage(this)" alt="Detalhe de textura" role="option" aria-selected="false" tabindex="0">
+                        <img th:src="${produto.urlImagem}" class="thumb-img" style="filter: contrast(1.2);" onclick="changeImage(this)" alt="Embalagem" role="option" aria-selected="false" tabindex="0">
+                    </div>
+                </div>
+
+                <!-- Detalhes do Produto -->
+                <div class="col-lg-6">
+                    <div class="store-info">
+                        <img th:src="${produto.loja.urlImagem}" class="store-logo" th:alt="${produto.loja.nome}">
+                        <a href="#" class="store-link" th:text="${produto.loja.nome}">Nome da Loja</a>
+                    </div>
+                    
+                    <h1 class="product-title" th:text="${produto.nome}">Nome do Produto</h1>
+                    
+                    <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+                        <div class="text-warning" aria-label="Avaliação: 4.8 de 5 estrelas">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-half"></i>
+                        </div>
+                        <a href="#reviews" class="text-muted small text-decoration-none hover-primary">(128 avaliações de clientes)</a>
+                        <span class="badge bg-success-subtle text-success border-0 rounded-pill px-2 py-1"><i class="bi bi-check-circle me-1"></i> Em estoque</span>
+                    </div>
+                    
+                    <div class="price-container">
+                        <span class="price-tag" th:text="'R$ ' + ${produto.preco}">R$ 0,00</span>
+                        <span class="text-muted fs-5" th:text="' / ' + ${produto.unidade}"> / kg</span>
+                        
+                        <th:block th:if="${produto.emPromocao}">
+                            <span class="original-price" th:text="'R$ ' + ${#numbers.formatDecimal(produto.preco * 1.25, 1, 2)}">R$ 0,00</span>
+                            <span class="discount-badge-inline">-20%</span>
+                        </th:block>
+                    </div>
+
+                    <p class="text-muted mb-4" th:text="${produto.descricao}">Descrição completa do produto e seus benefícios para a saúde.</p>
+                    
+                    <!-- Variações -->
+                    <div class="variation-selector">
+                        <div class="variation-title">Tipo / Qualidade:</div>
+                        <div class="variation-options" role="radiogroup">
+                            <button class="variation-btn active" role="radio" aria-checked="true">Padrão</button>
+                            <button class="variation-btn" role="radio" aria-checked="false">Orgânico Certificado (+R$ 2,00)</button>
+                            <button class="variation-btn" role="radio" aria-checked="false">Prêmio</button>
+                        </div>
+                    </div>
+
+                    <!-- Trust Badges -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-6">
+                            <div class="trust-badge">
+                                <i class="bi bi-shield-check"></i>
+                                <div>
+                                    <strong class="d-block">Produtor Verificado</strong>
+                                    <span class="text-muted small">Qualidade garantida</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="trust-badge">
+                                <i class="bi bi-arrow-repeat"></i>
+                                <div>
+                                    <strong class="d-block">Troca Fácil</strong>
+                                    <span class="text-muted small">Devolução em até 7 dias</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Observações -->
+                    <div class="mb-4">
+                        <label for="observacoes" class="form-label fw-bold text-dark">Instruções para o produtor?</label>
+                        <textarea class="form-control bg-light border-0" id="observacoes" rows="2" placeholder="Ex: Preferência por produtos mais verdes ou maduros..."></textarea>
+                    </div>
+
+                    <!-- Desktop Actions -->
+                    <div class="action-container">
+                        <div class="qty-selector">
+                            <button class="qty-btn" onclick="updateQty(-1, 'desktop')" aria-label="Diminuir quantidade"><i class="bi bi-dash"></i></button>
+                            <input type="number" class="qty-input" value="1" id="qty-desktop" min="1" aria-label="Quantidade">
+                            <button class="qty-btn" onclick="updateQty(1, 'desktop')" aria-label="Aumentar quantidade"><i class="bi bi-plus"></i></button>
+                        </div>
+                        
+                        <button class="btn-add-cart" onclick="addToCart(this)">
+                            <i class="bi bi-cart-plus fs-5"></i> <span>Adicionar ao Carrinho</span>
+                        </button>
+                        
+                        <button class="btn-buy-now" onclick="buyNow()">
+                            Comprar Agora
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Sticky Bottom Bar -->
+    <div class="mobile-bottom-bar shadow-lg">
+        <div class="qty-selector-mobile">
+            <button class="qty-btn-mobile" onclick="updateQty(-1, 'mobile')" aria-label="Diminuir"><i class="bi bi-dash"></i></button>
+            <input type="text" class="qty-input-mobile" value="1" id="qty-mobile" readonly aria-label="Quantidade">
+            <button class="qty-btn-mobile" onclick="updateQty(1, 'mobile')" aria-label="Aumentar"><i class="bi bi-plus"></i></button>
+        </div>
+        <button class="btn-add-cart-mobile" onclick="addToCart(this)">
+            <span>Adicionar</span> • <span id="total-mobile-price" th:text="'R$ ' + ${produto.preco}">R$ 0,00</span>
+        </button>
+    </div>
+
+    <!-- Toast de Notificação -->
+    <div class="toast-container">
+        <div id="cartToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body fw-medium">
+                    <i class="bi bi-check-circle-fill me-2"></i> Produto adicionado ao carrinho com sucesso!
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        const basePrice = /*[[${produto.preco}]]*/ 0;
+        
+        // Atualizar contador do carrinho
+        function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('farmfood_cart')) || [];
+            const badge = document.getElementById('cart-badge');
+            if (badge) {
+                const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+                if (totalItems > 0) {
+                    badge.innerText = totalItems;
+                    badge.style.display = 'block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+        document.addEventListener('DOMContentLoaded', updateCartBadge);
+        
+        // Sincronizar inputs mobile e desktop
+        function updateQty(change, source) {
+            const inputDesktop = document.getElementById('qty-desktop');
+            const inputMobile = document.getElementById('qty-mobile');
+            
+            let currentVal = parseInt(source === 'desktop' ? inputDesktop.value : inputMobile.value);
+            if (isNaN(currentVal)) currentVal = 1;
+            
+            let newVal = currentVal + change;
+            
+            if (newVal >= 1) {
+                inputDesktop.value = newVal;
+                inputMobile.value = newVal;
+                updateMobileTotal(newVal);
+            }
+        }
+        
+        // Atualiza input se digitado manualmente no desktop
+        document.getElementById('qty-desktop').addEventListener('change', function() {
+            let val = parseInt(this.value);
+            if (isNaN(val) || val < 1) {
+                this.value = 1;
+                val = 1;
+            }
+            document.getElementById('qty-mobile').value = val;
+            updateMobileTotal(val);
+        });
+        
+        function updateMobileTotal(qty) {
+            const total = basePrice * qty;
+            document.getElementById('total-mobile-price').innerText = 'R$ ' + total.toFixed(2).replace('.', ',');
+        }
+
+        // Galeria de imagens com suporte a teclado (acessibilidade)
+        function changeImage(element) {
+            document.querySelectorAll('.thumb-img').forEach(img => {
+                img.classList.remove('active');
+                img.setAttribute('aria-selected', 'false');
+            });
+            
+            element.classList.add('active');
+            element.setAttribute('aria-selected', 'true');
+            
+            const mainImg = document.getElementById('main-image');
+            mainImg.style.opacity = 0;
+            
+            setTimeout(() => {
+                mainImg.src = element.src;
+                mainImg.style.filter = element.style.filter; // Apenas simulação
+                mainImg.style.opacity = 1;
+            }, 200);
+        }
+        
+        document.querySelectorAll('.thumb-img').forEach(img => {
+            img.addEventListener('keydown', (e) => {
+                if(e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    changeImage(img);
+                }
+            });
+        });
+
+        // Efeito de Zoom na Imagem Principal (Desktop)
+        const container = document.getElementById('image-container');
+        const img = document.getElementById('main-image');
+        
+        container.addEventListener('mousemove', (e) => {
+            if(window.innerWidth > 991) {
+                const { left, top, width, height } = container.getBoundingClientRect();
+                const x = (e.clientX - left) / width * 100;
+                const y = (e.clientY - top) / height * 100;
+                img.style.transformOrigin = `${x}% ${y}%`;
+            }
+        });
+        
+        container.addEventListener('mouseleave', () => {
+            img.style.transformOrigin = 'center center';
+        });
+
+        // Botões de variação (Microinterações e Acessibilidade)
+        document.querySelectorAll('.variation-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.variation-btn').forEach(b => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-checked', 'false');
+                });
+                e.target.classList.add('active');
+                e.target.setAttribute('aria-checked', 'true');
+            });
+        });
+
+        // Adicionar ao Carrinho Feedback (Loading state)
+        function addToCart(btn) {
+            if(btn.disabled) return;
+            
+            const originalContent = btn.innerHTML;
+            const isMobile = btn.classList.contains('btn-add-cart-mobile');
+            
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ${isMobile ? 'Adicionando...' : 'Adicionando ao Carrinho...'}`;
+            btn.disabled = true;
+            
+            // Simula request assíncrono
+            setTimeout(() => {
+                // Adicionar ao LocalStorage
+                const productId = /*[[${produto.id}]]*/ '1';
+                const productName = /*[[${produto.nome}]]*/ 'Produto';
+                const productPrice = basePrice;
+                const productImg = /*[[${produto.urlImagem}]]*/ '';
+                const storeName = /*[[${produto.loja.nome}]]*/ 'Loja';
+                const qty = parseInt(document.getElementById(isMobile ? 'qty-mobile' : 'qty-desktop').value) || 1;
+                
+                let cart = JSON.parse(localStorage.getItem('farmfood_cart')) || [];
+                const existingItemIndex = cart.findIndex(item => item.id == productId);
+                
+                if(existingItemIndex > -1) {
+                    cart[existingItemIndex].qty += qty;
+                } else {
+                    cart.push({
+                        id: productId,
+                        name: productName,
+                        price: productPrice,
+                        img: productImg,
+                        store: storeName,
+                        qty: qty
+                    });
+                }
+                localStorage.setItem('farmfood_cart', JSON.stringify(cart));
+                updateCartBadge();
+
+                btn.innerHTML = '<i class="bi bi-check-lg"></i> Adicionado';
+                
+                if(isMobile) {
+                    btn.classList.add('bg-success');
+                } else {
+                    btn.classList.replace('btn-add-cart', 'btn-success');
+                }
+                
+                // Show toast notification
+                const toast = new bootstrap.Toast(document.getElementById('cartToast'));
+                toast.show();
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalContent;
+                    btn.disabled = false;
+                    if(isMobile) {
+                        btn.classList.remove('bg-success');
+                    } else {
+                        btn.classList.replace('btn-success', 'btn-add-cart');
+                    }
+                }, 2500);
+            }, 800);
+        }
+        
+        function buyNow() {
+            const btn = document.querySelector('.btn-buy-now');
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processando...';
+            btn.disabled = true;
+
+            // Adicionar ao carrinho antes de redirecionar
+            const productId = /*[[${produto.id}]]*/ '1';
+            const productName = /*[[${produto.nome}]]*/ 'Produto';
+            const productPrice = basePrice;
+            const productImg = /*[[${produto.urlImagem}]]*/ '';
+            const storeName = /*[[${produto.loja.nome}]]*/ 'Loja';
+            const qty = parseInt(document.getElementById('qty-desktop').value) || 1;
+            
+            let cart = JSON.parse(localStorage.getItem('farmfood_cart')) || [];
+            const existingItemIndex = cart.findIndex(item => item.id == productId);
+            
+            if(existingItemIndex > -1) {
+                cart[existingItemIndex].qty += qty;
+            } else {
+                cart.push({
+                    id: productId,
+                    name: productName,
+                    price: productPrice,
+                    img: productImg,
+                    store: storeName,
+                    qty: qty
+                });
+            }
+            localStorage.setItem('farmfood_cart', JSON.stringify(cart));
+            
+            setTimeout(() => {
+                window.location.href = '/checkout';
+            }, 600);
+        }
+        
+        // Inicializar preco
+        updateMobileTotal(1);
+    </script>
+</body>
+</html>

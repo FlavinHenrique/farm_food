@@ -1,0 +1,282 @@
+:root {
+    --primary-color: #2d5a27;
+    --secondary-color: #f1f8f1;
+    --accent-color: #8bc34a;
+    --text-color: #333;
+    --light-gray: #f9f9f9;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-color);
+    background-color: #fff;
+}
+
+.navbar {
+    padding: 1rem 2rem;
+    background: white;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: var(--primary-color) !important;
+    font-size: 1.5rem;
+}
+
+.nav-link {
+    color: var(--text-color) !important;
+    font-weight: 500;
+    margin: 0 0.5rem;
+}
+
+.hero-section {
+    padding: 4rem 2rem;
+    background-color: var(--secondary-color);
+    border-radius: 0 0 50px 50px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-content h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    line-height: 1.2;
+}
+
+.hero-image-container {
+    position: relative;
+}
+
+.hero-image {
+    width: 100%;
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+}
+
+.btn-primary-custom {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    padding: 0.8rem 2rem;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+/* Design Perfil do Cliente */
+.profile-bg {
+    background-color: #e2ede3;
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-illustration-left {
+    position: absolute;
+    left: -50px;
+    top: 50px;
+    width: 300px;
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.profile-illustration-right {
+    position: absolute;
+    right: -20px;
+    top: 150px;
+    width: 250px;
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.profile-illustration-bottom {
+    position: absolute;
+    left: 20px;
+    bottom: -20px;
+    width: 350px;
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.profile-sidebar {
+    padding-top: 2rem;
+}
+
+.profile-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 25px;
+    margin-bottom: 10px;
+    border-radius: 50px;
+    text-decoration: none;
+    color: #2d5a27;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.profile-menu-item i {
+    font-size: 1.2rem;
+    margin-right: 15px;
+}
+
+.profile-menu-item.active {
+    background-color: #2d5a27;
+    color: white;
+}
+
+.profile-menu-item:hover:not(.active) {
+    background-color: rgba(45, 90, 39, 0.1);
+}
+
+.profile-card {
+    background: white;
+    border-radius: 30px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.profile-title {
+    color: #2d5a27;
+    font-weight: 700;
+    font-size: 2.2rem;
+    margin-bottom: 30px;
+}
+
+.profile-input {
+    border-radius: 20px;
+    border: 1.5px solid #333;
+    padding: 12px 25px;
+    margin-bottom: 20px;
+    background: white;
+}
+
+.profile-input:focus {
+    border-color: #2d5a27;
+    box-shadow: 0 0 0 0.2rem rgba(45, 90, 39, 0.1);
+}
+
+.btn-edit-profile {
+    background-color: #2d5a27;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 40px;
+    font-weight: 600;
+    float: right;
+    margin-top: 10px;
+}
+
+.logout-link {
+    margin-top: 50px;
+    display: inline-block;
+    color: #333;
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 1.1rem;
+}
+
+.btn-outline-custom {
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 0.8rem 2rem;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.section-title {
+    font-weight: 700;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.card {
+    border: none;
+    border-radius: 20px;
+    transition: transform 0.3s;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.product-card img {
+    border-radius: 20px 20px 0 0;
+    height: 200px;
+    object-fit: cover;
+}
+
+.discount-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--primary-color);
+    color: white;
+    padding: 0.2rem 0.8rem;
+    border-radius: 10px;
+    font-size: 0.8rem;
+}
+
+.store-item {
+    text-align: center;
+}
+
+.store-img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 0.5rem;
+    border: 3px solid var(--secondary-color);
+}
+
+.footer {
+    background-color: var(--secondary-color);
+    padding: 4rem 2rem 2rem;
+    margin-top: 4rem;
+}
+
+.category-icon {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+/* Novos estilos para filtros */
+.filter-container {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 10px 5px;
+    scrollbar-width: none; /* Firefox */
+}
+
+.filter-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.btn-filter {
+    white-space: nowrap;
+    border-radius: 50px;
+    padding: 8px 20px;
+    border: 1px solid #ddd;
+    background: white;
+    color: var(--text-color);
+    transition: all 0.3s;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.btn-filter:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background-color: var(--secondary-color);
+}
+
+.btn-filter.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 4px 10px rgba(45, 90, 39, 0.2);
+}
+

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formas de Pagamento - Farm Food</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="profile-bg">
+
+    <!-- Header / Navbar Minimalista -->
+    <nav class="navbar bg-transparent border-0 py-4">
+        <div class="container">
+            <a class="navbar-brand text-primary-custom fw-bold fs-3" href="/">Farm Food</a>
+            <div class="d-flex align-items-center gap-4">
+                <a href="/" class="text-dark"><i class="bi bi-search fs-5"></i></a>
+                <a th:href="@{/customer/profile}" class="text-dark"><i class="bi bi-person fs-5"></i></a>
+                <a href="/cart" class="text-dark position-relative d-flex align-items-center justify-content-center" style="text-decoration: none;">
+                    <i class="bi bi-cart fs-5"></i>
+                    <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; display: none; pointer-events: none;">0</span>
+                </a>
+                <a th:href="@{/}" class="btn btn-outline-dark rounded-pill px-4 btn-sm fw-bold">Voltar para a loja</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 profile-sidebar">
+                <a th:href="@{/customer/profile}" class="profile-menu-item">
+                    Meu dados
+                </a>
+                <a th:href="@{/customer/addresses}" class="profile-menu-item">
+                    <i class="bi bi-geo-alt"></i> Endereços
+                </a>
+                <a th:href="@{/customer/payments}" class="profile-menu-item active">
+                    <i class="bi bi-credit-card"></i> Pagamentos
+                </a>
+                <a href="#" class="profile-menu-item">
+                    Favoritos
+                </a>
+                
+                <a th:href="@{/logout}" class="logout-link">
+                    Sair da conta
+                </a>
+            </div>
+
+            <!-- Content -->
+            <div class="col-lg-8 offset-lg-1">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="profile-title mb-0">Formas de Pagamento</h1>
+                    <button class="btn btn-primary-custom rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addPaymentModal">
+                        <i class="bi bi-plus-lg me-2"></i> Novo Cartão
+                    </button>
+                </div>
+
+                <div th:if="${param.error == 'invalid_card'}" class="alert alert-danger rounded-4 border-0 mb-4">
+                    Número de cartão inválido. Por favor, verifique os dados.
+                </div>
+
+                <div th:if="${payments.empty}" class="text-center py-5">
+                    <i class="bi bi-credit-card text-muted fs-1 mb-3 d-block"></i>
+                    <p class="text-muted">Você ainda não cadastrou nenhuma forma de pagamento.</p>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4" th:each="pay : ${payments}">
+                        <div class="profile-card h-100">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-credit-card-2-front fs-4 text-primary-custom"></i>
+                                    <h5 class="fw-bold mb-0" th:text="${pay.bandeira}">Visa</h5>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-link text-dark p-0" data-bs-toggle="dropdown">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                        <li><a class="dropdown-item text-danger" th:href="@{'/customer/payment/delete/' + ${pay.id}}">Excluir</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <p class="mb-1 text-muted fw-medium" th:text="'**** **** **** ' + ${pay.numeroCartao.substring(pay.numeroCartao.length() - 4)}"></p>
+                            <p class="mb-1 text-muted small" th:text="${pay.nomeTitular}"></p>
+                            <p class="mb-0 text-muted small" th:text="'Validade: ' + ${pay.dataValidade}"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Novo Pagamento -->
+    <div class="modal fade" id="addPaymentModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Novo Cartão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form th:action="@{/customer/payment/save}" th:object="${newPayment}" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Nome no Cartão</label>
+                            <input type="text" class="form-control profile-input" th:field="*{nomeTitular}" placeholder="Como impresso no cartão" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Número do Cartão</label>
+                            <input type="text" class="form-control profile-input" th:field="*{numeroCartao}" placeholder="0000 0000 0000 0000" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small fw-bold">Validade</label>
+                                <input type="text" class="form-control profile-input" th:field="*{dataValidade}" placeholder="MM/AA" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small fw-bold">Bandeira</label>
+                                <select class="form-select profile-input" th:field="*{bandeira}" required>
+                                    <option value="Visa">Visa</option>
+                                    <option value="Mastercard">Mastercard</option>
+                                    <option value="Elo">Elo</option>
+                                    <option value="American Express">American Express</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary-custom w-100 rounded-pill py-2 fw-bold">Salvar Cartão</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

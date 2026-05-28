@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Farm Food</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--secondary-color);
+        }
+        .login-card {
+            background: white;
+            padding: 3.5rem;
+            border-radius: 35px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.06);
+            max-width: 450px;
+            width: 100%;
+        }
+        .login-logo {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            display: block;
+            text-decoration: none;
+        }
+        .form-control {
+            border-radius: 12px;
+            padding: 0.9rem 1.2rem;
+            border: 1px solid #eee;
+            background-color: #fcfcfc;
+        }
+        .form-control:focus {
+            background-color: white;
+            box-shadow: 0 0 0 4px rgba(45, 90, 39, 0.1);
+            border-color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <!-- Carrinho Flutuante (Opcional para Login) -->
+        <div class="position-fixed top-0 end-0 p-4" style="z-index: 1000;">
+            <a href="/cart" class="text-dark position-relative bg-white p-3 rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; text-decoration: none;">
+                <i class="bi bi-cart fs-5"></i>
+                <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; display: none; pointer-events: none;">0</span>
+            </a>
+        </div>
+
+        <div class="login-card text-center">
+            <a th:href="@{/}" class="login-logo">Farm Food</a>
+            
+            <h3 class="fw-bold mb-1">Bem-vindo de volta!</h3>
+            <p class="text-muted mb-4">Acesse sua conta para continuar</p>
+
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show rounded-4 border-0 mb-4" role="alert">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                <span th:text="${error}">Erro</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <form th:action="@{/login}" method="post">
+                <div class="text-start mb-3">
+                    <label class="form-label fw-bold small">E-mail</label>
+                    <input type="email" name="email" class="form-control" placeholder="seu@email.com" required>
+                </div>
+                <div class="text-start mb-4">
+                    <div class="d-flex justify-content-between">
+                        <label class="form-label fw-bold small">Senha</label>
+                        <a href="#" class="text-success small text-decoration-none fw-bold">Esqueceu?</a>
+                    </div>
+                    <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary-custom w-100 py-3 mb-4">Entrar</button>
+                
+                <div class="text-center">
+                    <p class="text-muted small">Não tem uma conta? <a th:href="@{/register}" class="text-success fw-bold text-decoration-none">Cadastre-se agora</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Atualizar contador do carrinho
+        function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('farmfood_cart')) || [];
+            const badge = document.getElementById('cart-badge');
+            if (badge) {
+                const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+                if (totalItems > 0) {
+                    badge.innerText = totalItems;
+                    badge.style.display = 'block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+        document.addEventListener('DOMContentLoaded', updateCartBadge);
+    </script>
+</body>
+</html>

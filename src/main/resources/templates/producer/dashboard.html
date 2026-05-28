@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Produtor - Farm Food</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --sidebar-green: #2d5a27;
+            --active-bg: #ffffff;
+            --active-text: #2d5a27;
+            --sidebar-text: #ffffff;
+            --sidebar-text-muted: rgba(255, 255, 255, 0.7);
+            --body-bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--body-bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Sidebar Layout */
+        .wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background-color: var(--sidebar-green);
+            color: var(--sidebar-text);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .sidebar-brand {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 3rem;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.2rem;
+            color: var(--sidebar-text-muted) !important;
+            text-decoration: none;
+            border-radius: 30px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-link i {
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white !important;
+        }
+
+        .nav-link.active {
+            background-color: var(--active-bg);
+            color: var(--active-text) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 2rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            margin-left: 280px;
+            padding: 2.5rem 3.5rem;
+        }
+
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .user-greeting {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .header-icons {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .header-icons i {
+            font-size: 1.4rem;
+            color: #1a1a1a;
+            cursor: pointer;
+        }
+
+        .profile-pic {
+            width: 45px;
+            height: 45px;
+            background-color: #eee;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .full-width-card {
+            grid-column: span 2;
+        }
+
+        .card {
+            background: white;
+            border: none;
+            border-radius: 25px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Income Stats */
+        .income-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .income-label {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        /* List of stores/sales */
+        .store-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .store-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .store-item:last-child {
+            border-bottom: none;
+        }
+
+        .store-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .store-img {
+            width: 50px;
+            height: 50px;
+            background-color: #e3f2fd;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2196f3;
+            font-size: 1.2rem;
+        }
+
+        .store-name {
+            font-weight: 600;
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        .store-date {
+            font-size: 0.8rem;
+            color: #aaa;
+            margin: 0;
+        }
+
+        .store-price {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        /* Dropdowns/Filters */
+        .filter-select {
+            border: 1px solid #eee;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .btn-income {
+            background-color: #444;
+            color: white;
+            border: none;
+            padding: 0.4rem 1.2rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <a href="/" class="sidebar-brand">FarmFood</a>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a th:href="@{/producer/dashboard}" class="nav-link active">
+                        <i class="bi bi-grid-fill"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a th:href="@{/producer/stores}" class="nav-link">
+                        <i class="bi bi-shop"></i> Minhas lojas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a th:href="@{/producer/products}" class="nav-link">
+                        <i class="bi bi-box-seam-fill"></i> Produtos
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-bar-chart-line-fill"></i> Vendas
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="bi bi-chat-dots-fill"></i> Mensagens
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="bi bi-gear-fill"></i> Configurações
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a th:href="@{/logout}" class="nav-link">
+                            <i class="bi bi-box-arrow-right"></i> Sair
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header class="top-header">
+                <h1 class="user-greeting" th:text="'Olá produtor ' + ${produtor.nome}">Olá produtor João</h1>
+                
+                <div class="header-icons">
+                    <i class="bi bi-envelope"></i>
+                    <i class="bi bi-bell"></i>
+                    <div class="profile-pic">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+                <!-- General Dashboard Chart -->
+                <div class="card full-width-card">
+                    <div class="card-header-flex">
+                        <h2 class="card-title mb-0">Dashboard geral</h2>
+                        <div class="d-flex gap-2">
+                            <button class="btn-income">Income <i class="bi bi-arrow-down"></i></button>
+                            <select class="filter-select">
+                                <option>Month</option>
+                                <option>Week</option>
+                            </select>
+                        </div>
+                    </div>
+                    <canvas id="generalChart" height="100"></canvas>
+                </div>
+
+                <!-- Rendimentos -->
+                <div class="card">
+                    <div class="text-center">
+                        <h2 class="card-title">Rendimentos</h2>
+                        <p class="income-label mb-1">Saved this month</p>
+                        <h3 class="income-value">$12,281</h3>
+                        <p class="income-label mb-4">Your payment will be updated by the system.</p>
+                    </div>
+                    <canvas id="yieldChart" height="150"></canvas>
+                </div>
+
+                <!-- Lojas que mais venderam -->
+                <div class="card">
+                    <h2 class="card-title">Lojas que mais tiveram vendas</h2>
+                    <ul class="store-list">
+                        <li class="store-item" th:each="store, iter : ${stores}" th:if="${iter.index < 4}">
+                            <div class="store-info">
+                                <div class="store-img">
+                                    <i class="bi bi-shop"></i>
+                                </div>
+                                <div>
+                                    <p class="store-name" th:text="${store.nome}">Nome da Loja</p>
+                                    <p class="store-date">12 Nov 2021 4:45AM</p>
+                                </div>
+                            </div>
+                            <span class="store-price">$15</span>
+                        </li>
+                        <!-- Fallback static items if no stores -->
+                        <li class="store-item" th:if="${#lists.isEmpty(stores)}">
+                            <div class="store-info">
+                                <div class="store-img"><i class="bi bi-shop"></i></div>
+                                <div>
+                                    <p class="store-name">Nenhuma loja cadastrada</p>
+                                    <p class="store-date">Cadastre sua primeira loja</p>
+                                </div>
+                            </div>
+                            <span class="store-price">$0</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // General Area Chart
+        const ctxGeneral = document.getElementById('generalChart').getContext('2d');
+        const gradientGeneral = ctxGeneral.createLinearGradient(0, 0, 0, 300);
+        gradientGeneral.addColorStop(0, 'rgba(45, 90, 39, 0.3)');
+        gradientGeneral.addColorStop(1, 'rgba(45, 90, 39, 0)');
+
+        new Chart(ctxGeneral, {
+            type: 'line',
+            data: {
+                labels: ['Nov 1', 'Nov 4', 'Nov 8', 'Nov 12', 'Nov 16'],
+                datasets: [{
+                    label: 'Income',
+                    data: [25, 18, 35, 12, 38],
+                    borderColor: '#2d5a27',
+                    borderWidth: 3,
+                    fill: true,
+                    backgroundColor: gradientGeneral,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: '#2d5a27',
+                    pointHoverBorderColor: '#fff',
+                    pointHoverBorderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: value => '$' + value,
+                            color: '#aaa',
+                            font: { size: 12 }
+                        },
+                        grid: { display: false }
+                    },
+                    x: {
+                        ticks: { color: '#aaa', font: { size: 12 } },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        // Yield Bar Chart
+        const ctxYield = document.getElementById('yieldChart').getContext('2d');
+        new Chart(ctxYield, {
+            type: 'bar',
+            data: {
+                labels: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+                datasets: [{
+                    data: [22, 18, 28, 25, 20, 24, 21],
+                    backgroundColor: '#2d5a27',
+                    borderRadius: 5,
+                    barThickness: 8
+                }, {
+                    data: [30, 25, 32, 28, 25, 28, 30],
+                    backgroundColor: '#e0e0e0',
+                    borderRadius: 5,
+                    barThickness: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { display: false },
+                    x: {
+                        ticks: { color: '#aaa', font: { size: 12 } },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

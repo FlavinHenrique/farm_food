@@ -1,0 +1,72 @@
+package com.foodfarmer.foodfarmer.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.foodfarmer.foodfarmer.model.PapelUsuario;
+import com.foodfarmer.foodfarmer.model.Produto;
+import com.foodfarmer.foodfarmer.service.AutenticacaoService;
+import com.foodfarmer.foodfarmer.service.ProdutoService;
+
+@Controller
+public class HomeController {
+    private final ProdutoService produtoService;
+    private final AutenticacaoService autenticacaoService;
+
+    public HomeController(ProdutoService produtoService, AutenticacaoService autenticacaoService) {
+        this.produtoService = produtoService;
+        this.autenticacaoService = autenticacaoService;
+    }
+
+    @GetMapping("/")
+    public String index(@RequestParam(required = false) Long categoriaId, 
+                        @RequestParam(required = false) Boolean emOferta,
+                        Model model) {
+        model.addAttribute("isLoggedIn", autenticacaoService.estaLogado());
+        model.addAttribute("isProducer", autenticacaoService.estaLogado() && 
+            autenticacaoService.getUsuarioAtual().get().getPapel() == PapelUsuario.PRODUTOR);
+        
+        model.addAttribute("categories", produtoService.getTodasCategorias());
+        model.addAttribute("saleProducts", produtoService.getProdutosEmPromocao());
+        model.addAttribute("stores", produtoService.getTodasLojas());
+        
+        // Lógica de filtragem de produtos
+        if (Boolean.TRUE.equals(emOferta)) {
+            model.addAttribute("products", produtoService.getProdutosEmPromocao());
+            model.addAttribute("selectedCategory", "oferta");
+        } else if (categoriaId != null) {
+            model.addAttribute("products", produtoService.getProdutosPorCategoria(categoriaId));
+            model.addAttribute("selectedCategoryId", categoriaId);
+        } else {
+            model.addAttribute("products", produtoService.getTodosProdutos());
+        }
+        
+        return "index";
+    }
+
+    @GetMapping("/produto/{id}")
+    public String produtoDetalhe(@PathVariable Long id, Model model) {
+        Produto produto = produtoService.getProdutoPorId(id)
+            .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado: " + id));
+        
+        model.addAttribute("produto", produto);
+        model.addAttribute("isLoggedIn", autenticacaoService.estaLogado());
+        
+        return "product-detail";
+    }
+
+    @GetMapping("/cart")
+    public String cart(Model model) {
+        model.addAttribute("isLoggedIn", autenticacaoService.estaLogado());
+        return "cart";
+    }
+
+    @GetMapping("/checkout")
+    public String checkout(Model model) {
+        model.addAttribute("isLoggedIn", autenticacaoService.estaLogado());
+        return "checkout";
+    }
+}

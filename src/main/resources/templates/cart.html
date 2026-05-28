@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrinho de Compras - Farm Food</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        body { background-color: var(--light-gray, #f9f9f9); }
+        
+        .cart-container { background: #fff; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); padding: 2rem; }
+        
+        .cart-item { display: flex; align-items: center; padding: 1.5rem 0; border-bottom: 1px solid #eee; gap: 15px; }
+        .cart-item:last-child { border-bottom: none; }
+        
+        .item-img-container { width: 100px; height: 100px; border-radius: 12px; overflow: hidden; flex-shrink: 0; }
+        .item-img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .item-details { flex-grow: 1; }
+        .item-title { font-weight: 600; font-size: 1.1rem; color: var(--text-color); margin-bottom: 5px; }
+        .item-store { font-size: 0.85rem; color: #777; margin-bottom: 5px; }
+        .item-price { font-weight: 700; color: var(--primary-color); }
+        
+        .qty-control { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; height: 36px; width: fit-content; }
+        .qty-btn { background: #f8f9fa; border: none; width: 36px; height: 100%; color: var(--text-color); transition: background 0.2s; }
+        .qty-btn:hover { background: #e9ecef; }
+        .qty-input { width: 40px; text-align: center; border: none; font-weight: 600; height: 100%; }
+        .qty-input:focus { outline: none; }
+        
+        .item-total { font-weight: 700; font-size: 1.1rem; text-align: right; min-width: 100px; }
+        
+        .btn-remove { color: #ff4757; background: none; border: none; padding: 5px 10px; border-radius: 5px; transition: background 0.2s; font-size: 0.9rem; }
+        .btn-remove:hover { background: #ffebee; }
+        
+        .summary-card { background: #f8f9fa; border-radius: 15px; padding: 2rem; position: sticky; top: 100px; }
+        .summary-title { font-weight: 700; font-size: 1.2rem; margin-bottom: 1.5rem; }
+        
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 1rem; color: #555; }
+        .summary-row.total { font-weight: 800; color: var(--text-color); font-size: 1.3rem; border-top: 2px dashed #ddd; padding-top: 1rem; margin-top: 1rem; }
+        .summary-row.discount { color: #20c997; }
+        
+        .coupon-box, .shipping-box { display: flex; gap: 10px; margin-bottom: 1.5rem; }
+        .coupon-box input, .shipping-box input { border-radius: 8px; border: 1px solid #ddd; }
+        .coupon-box button, .shipping-box button { border-radius: 8px; font-weight: 500; }
+        
+        .btn-checkout { background-color: var(--primary-color); color: white; border: none; width: 100%; padding: 1rem; border-radius: 10px; font-weight: 700; font-size: 1.1rem; transition: all 0.3s; margin-top: 1rem; }
+        .btn-checkout:hover { background-color: #21421c; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(45, 90, 39, 0.3); color: white; }
+        
+        .empty-cart { text-align: center; padding: 4rem 2rem; }
+        .empty-cart i { font-size: 4rem; color: #ddd; margin-bottom: 1rem; }
+        
+        @media (max-width: 768px) {
+            .cart-item { flex-wrap: wrap; position: relative; padding-bottom: 2rem; }
+            .item-total { width: 100%; text-align: left; margin-top: 10px; font-size: 1.2rem; }
+            .btn-remove { position: absolute; bottom: 1.5rem; right: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/}">
+                <i class="bi bi-basket me-2"></i>Farm Food
+            </a>
+            <div class="d-flex align-items-center">
+                <a th:href="@{/}" class="btn btn-outline-custom btn-sm border-0">
+                    <i class="bi bi-house"></i> Início
+                </a>
+                <a href="/cart" class="text-dark position-relative ms-3 d-inline-block">
+                    <i class="bi bi-cart fs-5"></i>
+                    <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; display: none; pointer-events: none;">0</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <h2 class="fw-bold mb-4">Meu Carrinho</h2>
+        
+        <div class="row g-4" id="cart-content">
+            <!-- Items Column -->
+            <div class="col-lg-8">
+                <div class="cart-container" id="cart-items-container">
+                    <!-- Items will be injected here via JS -->
+                </div>
+            </div>
+            
+            <!-- Summary Column -->
+            <div class="col-lg-4">
+                <div class="summary-card">
+                    <h3 class="summary-title">Resumo da Compra</h3>
+                    
+                    <div class="shipping-box">
+                        <input type="text" id="cep-input" class="form-control" placeholder="Calcular CEP" maxlength="9">
+                        <button class="btn btn-outline-secondary" onclick="calculateShipping()">Calcular</button>
+                    </div>
+                    <div id="shipping-msg" class="small text-muted mb-3 d-none"></div>
+                    
+                    <div class="coupon-box">
+                        <input type="text" id="coupon-input" class="form-control" placeholder="Cupom de desconto">
+                        <button class="btn btn-outline-secondary" onclick="applyCoupon()">Aplicar</button>
+                    </div>
+                    <div id="coupon-msg" class="small mb-3 d-none"></div>
+
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span id="summary-subtotal">R$ 0,00</span>
+                    </div>
+                    <div class="summary-row" id="row-shipping">
+                        <span>Frete</span>
+                        <span id="summary-shipping">--</span>
+                    </div>
+                    <div class="summary-row discount d-none" id="row-discount">
+                        <span>Desconto</span>
+                        <span id="summary-discount">- R$ 0,00</span>
+                    </div>
+                    
+                    <div class="summary-row total">
+                        <span>Total</span>
+                        <span id="summary-total">R$ 0,00</span>
+                    </div>
+                    
+                    <a th:href="@{/checkout}" class="btn btn-checkout text-center text-decoration-none">
+                        Ir para Pagamento <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                    
+                    <div class="text-center mt-3">
+                        <a th:href="@{/}" class="text-muted text-decoration-none small hover-primary">
+                            <i class="bi bi-arrow-left"></i> Continuar comprando
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="empty-cart-msg" class="cart-container empty-cart d-none">
+            <i class="bi bi-cart-x"></i>
+            <h3 class="fw-bold mb-3">Seu carrinho está vazio</h3>
+            <p class="text-muted mb-4">Adicione produtos de nossos produtores locais para continuar.</p>
+            <a th:href="@{/}" class="btn btn-primary-custom">Ver Produtos</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let cart = JSON.parse(localStorage.getItem('farmfood_cart')) || [];
+        let shippingCost = 0;
+        let discountVal = 0;
+
+        function formatCurrency(val) {
+            return 'R$ ' + val.toFixed(2).replace('.', ',');
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-items-container');
+            const mainContent = document.getElementById('cart-content');
+            const emptyMsg = document.getElementById('empty-cart-msg');
+            
+            if (cart.length === 0) {
+                mainContent.classList.add('d-none');
+                emptyMsg.classList.remove('d-none');
+                return;
+            }
+            
+            mainContent.classList.remove('d-none');
+            emptyMsg.classList.add('d-none');
+            
+            container.innerHTML = '';
+            let subtotal = 0;
+            
+            cart.forEach((item, index) => {
+                const itemTotal = item.price * item.qty;
+                subtotal += itemTotal;
+                
+                container.innerHTML += `
+                    <div class="cart-item">
+                        <div class="item-img-container">
+                            <img src="${item.img || '/img/placeholder.jpg'}" alt="${item.name}" class="item-img" onerror="this.src='https://via.placeholder.com/100'">
+                        </div>
+                        <div class="item-details">
+                            <div class="item-title">${item.name}</div>
+                            <div class="item-store"><i class="bi bi-shop"></i> ${item.store}</div>
+                            <div class="item-price">${formatCurrency(item.price)}</div>
+                        </div>
+                        <div class="qty-control">
+                            <button class="qty-btn" onclick="updateQty(${index}, -1)" aria-label="Diminuir"><i class="bi bi-dash"></i></button>
+                            <input type="number" class="qty-input" value="${item.qty}" min="1" onchange="setQty(${index}, this.value)" aria-label="Quantidade">
+                            <button class="qty-btn" onclick="updateQty(${index}, 1)" aria-label="Aumentar"><i class="bi bi-plus"></i></button>
+                        </div>
+                        <div class="item-total">${formatCurrency(itemTotal)}</div>
+                        <button class="btn-remove" onclick="removeItem(${index})" aria-label="Remover item"><i class="bi bi-trash3"></i></button>
+                    </div>
+                `;
+            });
+            
+            updateSummary(subtotal);
+        }
+
+        function updateQty(index, change) {
+            if(cart[index].qty + change >= 1) {
+                cart[index].qty += change;
+                saveCart();
+                renderCart();
+            }
+        }
+
+        function setQty(index, val) {
+            let num = parseInt(val);
+            if(isNaN(num) || num < 1) num = 1;
+            cart[index].qty = num;
+            saveCart();
+            renderCart();
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            saveCart();
+            renderCart();
+        }
+
+        function saveCart() {
+            localStorage.setItem('farmfood_cart', JSON.stringify(cart));
+            updateCartBadge();
+        }
+
+        function updateCartBadge() {
+            const badge = document.getElementById('cart-badge');
+            if (badge) {
+                const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+                if (totalItems > 0) {
+                    badge.innerText = totalItems;
+                    badge.style.display = 'block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+
+        function calculateShipping() {
+            const cep = document.getElementById('cep-input').value.replace(/\D/g, '');
+            const msg = document.getElementById('shipping-msg');
+            
+            if(cep.length === 8) {
+                // Mock shipping calculation
+                shippingCost = 15.90;
+                msg.innerHTML = '<span class="text-success"><i class="bi bi-check-circle"></i> Entrega disponível (Expresso)</span>';
+                msg.classList.remove('d-none');
+                renderCart(); // Re-render to update summary
+            } else {
+                msg.innerHTML = '<span class="text-danger">CEP inválido</span>';
+                msg.classList.remove('d-none');
+            }
+        }
+
+        function applyCoupon() {
+            const coupon = document.getElementById('coupon-input').value.trim().toUpperCase();
+            const msg = document.getElementById('coupon-msg');
+            
+            if(coupon === 'FARM10') {
+                discountVal = 10; // R$ 10 off
+                msg.innerHTML = '<span class="text-success"><i class="bi bi-check-circle"></i> Cupom aplicado!</span>';
+                msg.classList.remove('d-none');
+            } else if(coupon === '') {
+                discountVal = 0;
+                msg.classList.add('d-none');
+            } else {
+                discountVal = 0;
+                msg.innerHTML = '<span class="text-danger">Cupom inválido</span>';
+                msg.classList.remove('d-none');
+            }
+            renderCart(); // Re-render to update summary
+        }
+
+        function updateSummary(subtotal) {
+            document.getElementById('summary-subtotal').innerText = formatCurrency(subtotal);
+            
+            if(shippingCost > 0) {
+                document.getElementById('summary-shipping').innerText = formatCurrency(shippingCost);
+            } else {
+                document.getElementById('summary-shipping').innerText = '--';
+            }
+            
+            const rowDiscount = document.getElementById('row-discount');
+            if(discountVal > 0) {
+                document.getElementById('summary-discount').innerText = '- ' + formatCurrency(discountVal);
+                rowDiscount.classList.remove('d-none');
+            } else {
+                rowDiscount.classList.add('d-none');
+            }
+            
+            let total = subtotal + shippingCost - discountVal;
+            if(total < 0) total = 0;
+            
+            document.getElementById('summary-total').innerText = formatCurrency(total);
+        }
+
+        // Initialize
+        document.getElementById('cep-input').addEventListener('input', function (e) {
+            var x = e.target.value.replace(/\D/g, '').match(/(\d{0,5})(\d{0,3})/);
+            e.target.value = !x[2] ? x[1] : x[1] + '-' + x[2];
+        });
+
+        renderCart();
+        updateCartBadge();
+    </script>
+</body>
+</html>

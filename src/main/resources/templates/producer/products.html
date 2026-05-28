@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Produtos - Farm Food</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-green: #2d5a27;
+            --active-bg: #ffffff;
+            --active-text: #2d5a27;
+            --sidebar-text: #ffffff;
+            --sidebar-text-muted: rgba(255, 255, 255, 0.7);
+            --body-bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--body-bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        .wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background-color: var(--sidebar-green);
+            color: var(--sidebar-text);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .sidebar-brand {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 3rem;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.2rem;
+            color: var(--sidebar-text-muted) !important;
+            text-decoration: none;
+            border-radius: 30px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-link i {
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white !important;
+        }
+
+        .nav-link.active {
+            background-color: var(--active-bg);
+            color: var(--active-text) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 2rem;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            margin-left: 280px;
+            padding: 2.5rem 3.5rem;
+        }
+
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .btn-add-product {
+            background-color: var(--sidebar-green);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn-add-product:hover {
+            background-color: #23471e;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .card {
+            background: white;
+            border: none;
+            border-radius: 25px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+        }
+
+        .table-responsive {
+            margin-top: 1rem;
+        }
+
+        .table thead th {
+            border: none;
+            color: #888;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 1rem;
+        }
+
+        .table tbody td {
+            padding: 1.2rem 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .product-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            object-fit: cover;
+            margin-right: 1rem;
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 0;
+        }
+
+        .product-store {
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 0;
+        }
+
+        .badge-category {
+            background-color: #f0f4f0;
+            color: var(--sidebar-green);
+            font-weight: 600;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+
+        .price-text {
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .btn-edit-product {
+            color: #2d5a27;
+            background: #f0f4f0;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            margin-right: 0.5rem;
+        }
+
+        .btn-edit-product:hover {
+            background: #2d5a27;
+            color: white;
+        }
+
+        .btn-delete-product {
+            color: #d32f2f;
+            background: #fff0f0;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-delete-product:hover {
+            background: #d32f2f;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 5rem 0;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: #ccc;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <a href="/" class="sidebar-brand">FarmFood</a>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a th:href="@{/producer/dashboard}" class="nav-link">
+                        <i class="bi bi-grid-fill"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a th:href="@{/producer/stores}" class="nav-link">
+                        <i class="bi bi-shop"></i> Minhas lojas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a th:href="@{/producer/products}" class="nav-link active">
+                        <i class="bi bi-box-seam-fill"></i> Produtos
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-bar-chart-line-fill"></i> Vendas
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="bi bi-chat-dots-fill"></i> Mensagens
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="bi bi-gear-fill"></i> Configurações
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a th:href="@{/logout}" class="nav-link">
+                            <i class="bi bi-box-arrow-right"></i> Sair
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header class="top-header">
+                <h1 class="page-title">Gerenciar Produtos</h1>
+                <div class="dropdown" th:if="${!#lists.isEmpty(stores)}">
+                    <button class="btn-add-product dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-plus-lg me-2"></i> Adicionar Produto
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-4 p-2">
+                        <li th:each="store : ${stores}">
+                            <a class="dropdown-item rounded-3 py-2" th:href="@{/producer/product/new(storeId=${store.id})}">
+                                <i class="bi bi-shop me-2"></i> <span th:text="${store.nome}">Loja</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <a th:if="${#lists.isEmpty(stores)}" th:href="@{/producer/store/new}" class="btn-add-product">
+                    <i class="bi bi-shop me-2"></i> Criar Loja Primeiro
+                </a>
+            </header>
+
+            <div class="card">
+                <div th:if="${#lists.isEmpty(products)}" class="empty-state">
+                    <i class="bi bi-box-seam empty-icon"></i>
+                    <h3 class="fw-bold">Nenhum produto cadastrado</h3>
+                    <p class="text-muted">Comece cadastrando produtos em suas lojas para começar a vender.</p>
+                </div>
+
+                <div class="table-responsive" th:if="${!#lists.isEmpty(products)}">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Categoria</th>
+                                <th>Preço</th>
+                                <th>Status</th>
+                                <th class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="product : ${products}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img th:src="${product.urlImagem != null && !product.urlImagem.empty ? product.urlImagem : 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=100'}" class="product-img" alt="Produto">
+                                        <div>
+                                            <p class="product-name" th:text="${product.nome}">Nome do Produto</p>
+                                            <p class="product-store" th:text="${product.loja.nome}">Nome da Loja</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge-category" th:text="${product.categoria.nome}">Categoria</span>
+                                </td>
+                                <td>
+                                    <span class="price-text" th:text="'R$ ' + ${product.preco} + ' / ' + ${product.unidade}">R$ 0,00</span>
+                                </td>
+                                <td>
+                                    <span class="badge rounded-pill bg-success-subtle text-success px-3 py-2">Ativo</span>
+                                </td>
+                                <td class="text-end">
+                                    <a th:href="@{'/producer/product/edit/' + ${product.id}}" class="btn-edit-product">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
+                                    <a th:href="@{'/producer/product/delete/' + ${product.id}}" class="btn-delete-product" 
+                                       onclick="return confirm('Tem certeza que deseja excluir este produto?')">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
