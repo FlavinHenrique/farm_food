@@ -172,17 +172,24 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg sticky-top shadow-sm">
         <div class="container">
-            <a class="navbar-brand" th:href="@{/}">
-                <i class="bi bi-basket me-2"></i>Farm Food
-            </a>
-            <div class="d-flex align-items-center">
-                <a th:href="@{/}" class="btn btn-outline-custom btn-sm d-lg-none border-0">
-                    <i class="bi bi-chevron-left"></i> Voltar
-                </a>
-                <a href="/cart" class="text-dark position-relative ms-3 d-inline-block">
-                    <i class="bi bi-cart fs-5"></i>
-                    <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; display: none; pointer-events: none;">0</span>
-                </a>
+            <a class="navbar-brand" th:href="@{/}">Farm Food</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/produtos}">Menu</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Páginas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/#footer-info">Sobre</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/#footer-info">Contato</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-3">
+                    <a th:href="@{/cart}" class="text-dark position-relative d-flex align-items-center justify-content-center" style="text-decoration: none;">
+                        <i class="bi bi-cart fs-5"></i>
+                        <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; display: none; pointer-events: none;">0</span>
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
@@ -192,7 +199,7 @@
         <nav aria-label="breadcrumb" class="mt-4 d-none d-lg-block">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a th:href="@{/}">Início</a></li>
-                <li class="breadcrumb-item"><a href="#">Produtos</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/produtos}">Produtos</a></li>
                 <li class="breadcrumb-item active" aria-current="page" th:text="${produto.nome}">Produto</li>
             </ol>
         </nav>

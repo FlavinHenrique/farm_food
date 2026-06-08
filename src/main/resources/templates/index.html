@@ -20,12 +20,11 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav mx-auto">
-                    <li class="nav-link">Home</li>
-                    <li class="nav-link">Menu</li>
-                    <li class="nav-link">Blog</li>
-                    <li class="nav-link">Páginas</li>
-                    <li class="nav-link">Sobre</li>
-                    <li class="nav-link">Contato</li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/produtos}">Menu</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Páginas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#footer-info">Sobre</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#footer-info">Contato</a></li>
                 </ul>
                 <div class="d-flex align-items-center gap-3">
                     <a href="/" class="text-dark"><i class="bi bi-search"></i></a>
@@ -185,12 +184,12 @@
             </div>
         </div>
         <div class="text-center mt-5">
-            <button class="btn btn-primary-custom">Ver todos produtos</button>
+            <a th:href="@{/produtos}" class="btn btn-primary-custom">Ver todos produtos</a>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="footer" id="footer-info">
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 mb-4">

@@ -335,6 +335,46 @@
             updateTotals();
         }
 
+        function buscarCep() {
+            const cep = document.getElementById('cep').value.replace(/\D/g, '');
+            const errorElement = document.getElementById('cep-error');
+            
+            if (cep.length !== 8) {
+                errorElement.innerText = "CEP inválido. Digite 8 números.";
+                errorElement.style.display = 'block';
+                return;
+            }
+
+            errorElement.style.display = 'none';
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = '...';
+
+            fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.erro) {
+                        errorElement.innerText = "CEP não encontrado.";
+                        errorElement.style.display = 'block';
+                    } else {
+                        document.getElementById('logradouro').value = data.logradouro;
+                        document.getElementById('bairro').value = data.bairro;
+                        document.getElementById('cidade_uf').value = `${data.localidade} / ${data.uf}`;
+                        document.getElementById('numero').focus();
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar CEP:', error);
+                    errorElement.innerText = "Erro ao consultar o serviço.";
+                    errorElement.style.display = 'block';
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.innerText = originalText;
+                });
+        }
+
         function updateTotals() {
             const isPix = document.getElementById('pay-pix').checked;
             
@@ -409,20 +449,6 @@
             document.getElementById(`step-indicator-${current-1}`).classList.remove('completed');
         }
 
-        // Mock ViaCEP
-        function buscarCep() {
-            const cep = document.getElementById('cep').value.replace(/\D/g, '');
-            if(cep.length === 8) {
-                // Simulação
-                document.getElementById('logradouro').value = 'Rua das Flores';
-                document.getElementById('bairro').value = 'Jardim Botânico';
-                document.getElementById('cidade_uf').value = 'Curitiba / PR';
-                document.getElementById('numero').focus();
-                document.getElementById('cep-error').style.display = 'none';
-            } else {
-                document.getElementById('cep-error').style.display = 'block';
-            }
-        }
 
         // Máscaras simples
         document.getElementById('cpf').addEventListener('input', function(e) {

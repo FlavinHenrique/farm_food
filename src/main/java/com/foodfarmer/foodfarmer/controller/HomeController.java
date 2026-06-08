@@ -47,6 +47,26 @@ public class HomeController {
         return "index";
     }
 
+    @GetMapping("/produtos")
+    public String produtos(@RequestParam(required = false) Long categoriaId,
+                           @RequestParam(required = false) String search,
+                           Model model) {
+        model.addAttribute("isLoggedIn", autenticacaoService.estaLogado());
+        model.addAttribute("isProducer", autenticacaoService.estaLogado() && 
+            autenticacaoService.getUsuarioAtual().get().getPapel() == PapelUsuario.PRODUTOR);
+        
+        model.addAttribute("categories", produtoService.getTodasCategorias());
+        
+        if (categoriaId != null) {
+            model.addAttribute("products", produtoService.getProdutosPorCategoria(categoriaId));
+            model.addAttribute("selectedCategoryId", categoriaId);
+        } else {
+            model.addAttribute("products", produtoService.getTodosProdutos());
+        }
+        
+        return "produtos";
+    }
+
     @GetMapping("/produto/{id}")
     public String produtoDetalhe(@PathVariable Long id, Model model) {
         Produto produto = produtoService.getProdutoPorId(id)
