@@ -50,14 +50,6 @@
 <body>
 
     <div class="register-container">
-        <!-- Carrinho Flutuante -->
-        <div class="position-fixed top-0 end-0 p-4" style="z-index: 1000;">
-            <a href="/cart" class="text-dark position-relative bg-white p-3 rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; text-decoration: none;">
-                <i class="bi bi-cart fs-5"></i>
-                <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; display: none; pointer-events: none;">0</span>
-            </a>
-        </div>
-
         <div class="register-card">
             <div class="text-center">
                 <div class="user-icon-header">
@@ -74,6 +66,7 @@
             </div>
 
             <form th:action="@{/register}" th:object="${user}" method="post">
+                <input type="hidden" name="redirect" th:value="${redirect}">
                 <div class="mb-3">
                     <label class="form-label fw-bold">Nome completo</label>
                     <input type="text" th:field="*{nome}" class="form-control" placeholder="Seu nome" required>
@@ -90,7 +83,7 @@
                 <button type="submit" class="btn btn-primary-custom w-100 mb-3">Cadastrar</button>
                 
                 <div class="text-center">
-                    <p class="text-muted small">Já tem uma conta? <a href="#" class="text-success fw-bold text-decoration-none">Entrar</a></p>
+                    <p class="text-muted small">Já tem uma conta? <a th:href="@{/login(redirect=${redirect})}" class="text-success fw-bold text-decoration-none">Entrar</a></p>
                     <p class="text-muted small">Quer vender seus produtos? <a th:href="@{/register/producer}" class="text-success fw-bold text-decoration-none">Cadastre-se como Produtor</a></p>
                     <a th:href="@{/}" class="text-muted small text-decoration-none"><i class="bi bi-arrow-left"></i> Voltar para Home</a>
                 </div>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtores Parceiros - Farm Food</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .page-header {
+            background-color: #f8f9fa;
+            padding: 4rem 0;
+            margin-bottom: 3rem;
+            border-bottom: 1px solid #eee;
+        }
+        .store-card {
+            border: none;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            transition: all 0.3s;
+        }
+        .store-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+        }
+        .store-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+        .store-logo-overlay {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid white;
+            background-color: white;
+            margin-top: -40px;
+            margin-left: 20px;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .badge-verified {
+            background-color: #e8f5e9;
+            color: #2d5a27;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/}">Farm Food</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/produtos}">Menu</a></li>
+                    <li class="nav-item"><a class="nav-link active" th:href="@{/produtores}">Produtores</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#footer-info">Sobre</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#footer-info">Contato</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-3">
+                    <a th:if="${isLoggedIn}" th:href="@{/customer/profile}" class="text-dark"><i class="bi bi-person fs-5"></i></a>
+                    <a th:if="${!isLoggedIn}" th:href="@{/login}" class="btn btn-primary-custom btn-sm">Entrar</a>
+                    <a th:href="@{/cart}" class="text-dark position-relative d-flex align-items-center justify-content-center" style="text-decoration: none;">
+                        <i class="bi bi-cart fs-5"></i>
+                        <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; display: none;">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="page-header">
+        <div class="container text-center">
+            <h1 class="fw-bold display-5">Produtores Parceiros</h1>
+            <p class="text-muted">Conheça as mãos por trás dos alimentos frescos que chegam à sua mesa.</p>
+        </div>
+    </header>
+
+    <div class="container mb-5">
+        <div class="row g-4">
+            <!-- Store Cards Loop -->
+            <div class="col-md-4" th:each="store : ${stores}">
+                <div class="store-card card h-100">
+                    <img th:src="${store.urlImagem}" class="store-img-top" th:alt="${store.nome}">
+                    <div class="store-logo-overlay d-flex align-items-center justify-content-center overflow-hidden">
+                        <i class="bi bi-shop fs-2 text-success"></i>
+                    </div>
+                    <div class="card-body pt-2">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge-verified"><i class="bi bi-patch-check-fill me-1"></i> Verificado</span>
+                            <span class="text-muted small"><i class="bi bi-star-fill text-warning"></i> 5.0</span>
+                        </div>
+                        <h4 class="fw-bold mb-2" th:text="${store.nome}">Nome da Fazenda</h4>
+                        <p class="text-muted small mb-4" th:text="${store.descricao}">Descrição da fazenda e seus métodos de cultivo orgânico...</p>
+                        <a href="#" class="btn btn-outline-success w-100 rounded-pill fw-bold">Ver todos produtos</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(stores)}" class="text-center py-5">
+                <i class="bi bi-shop fs-1 text-muted mb-3 d-block"></i>
+                <p class="text-muted">Nenhum produtor cadastrado no momento.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer py-5 mt-5 bg-white border-top" id="footer-info">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h4 class="fw-bold text-success mb-4">Farm Food</h4>
+                    <p class="text-muted">Levando o melhor do campo diretamente para sua casa com sustentabilidade e carinho.</p>
+                </div>
+                <div class="col-lg-2 mb-4">
+                    <h5 class="fw-bold mb-4">Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a th:href="@{/}" class="text-decoration-none text-muted">Home</a></li>
+                        <li><a th:href="@{/produtos}" class="text-decoration-none text-muted">Menu</a></li>
+                        <li><a th:href="@{/produtores}" class="text-decoration-none text-muted">Produtores</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 mb-4">
+                    <h5 class="fw-bold mb-4">Contato</h5>
+                    <p class="text-muted small mb-1"><i class="bi bi-geo-alt me-2"></i> Rua do Campo, 123</p>
+                    <p class="text-muted small"><i class="bi bi-envelope me-2"></i> contato@foodfarmer.com</p>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center text-muted small">
+                <p>&copy; 2026 Farm Food. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

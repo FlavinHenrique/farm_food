@@ -5,31 +5,44 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.foodfarmer.foodfarmer.model.Usuario;
+import com.foodfarmer.foodfarmer.service.AutenticacaoService;
 import com.foodfarmer.foodfarmer.service.UsuarioService;
 
 @Controller
 public class UsuarioController {
     private final UsuarioService usuarioService;
+    private final AutenticacaoService autenticacaoService;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService, AutenticacaoService autenticacaoService) {
         this.usuarioService = usuarioService;
+        this.autenticacaoService = autenticacaoService;
     }
 
     @GetMapping("/register")
-    public String showRegistrationForm(Model model) {
+    public String showRegistrationForm(@RequestParam(required = false) String redirect, Model model) {
         model.addAttribute("user", new Usuario());
+        model.addAttribute("redirect", redirect);
         return "register";
     }
 
     @PostMapping("/register")
-    public String registerUser(@ModelAttribute("user") Usuario user, Model model) {
+    public String registerUser(@ModelAttribute("user") Usuario user, 
+                               @RequestParam(required = false) String redirect,
+                               Model model) {
         try {
-            usuarioService.registrarCliente(user);
+            Usuario salvo = usuarioService.registrarCliente(user);
+            autenticacaoService.login(salvo);
+            
+            if (redirect != null && !redirect.isEmpty()) {
+                return "redirect:" + redirect;
+            }
             return "redirect:/?registered=true";
         } catch (Exception e) {
             model.addAttribute("error", "Este e-mail já está cadastrado.");
+            model.addAttribute("redirect", redirect);
             return "register";
         }
     }
@@ -43,8 +56,9 @@ public class UsuarioController {
     @PostMapping("/register/producer")
     public String registerProducer(@ModelAttribute("user") Usuario user, Model model) {
         try {
-            usuarioService.registrarProdutor(user);
-            return "redirect:/?registered=true";
+            Usuario salvo = usuarioService.registrarProdutor(user);
+            autenticacaoService.login(salvo);
+            return "redirect:/producer/dashboard?registered=true";
         } catch (Exception e) {
             model.addAttribute("error", "Este e-mail ou CNPJ já está cadastrado.");
             return "register-producer";

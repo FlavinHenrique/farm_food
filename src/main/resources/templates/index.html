@@ -22,7 +22,7 @@
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item"><a class="nav-link" th:href="@{/}">Home</a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/produtos}">Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Páginas</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/produtores}">Produtores</a></li>
                     <li class="nav-item"><a class="nav-link" href="#footer-info">Sobre</a></li>
                     <li class="nav-item"><a class="nav-link" href="#footer-info">Contato</a></li>
                 </ul>
@@ -138,7 +138,7 @@
             </div>
         </div>
         <div class="text-center mt-5">
-            <a href="#" class="text-success fw-bold text-decoration-none">Ver todos produtores <i class="bi bi-arrow-right-circle"></i></a>
+            <a th:href="@{/produtores}" class="text-success fw-bold text-decoration-none">Ver todos produtores <i class="bi bi-arrow-right-circle"></i></a>
         </div>
     </section>
 
@@ -153,12 +153,12 @@
                    th:classappend="${selectedCategoryId == null and selectedCategory == null} ? 'active'">Todos</a>
                 
                 <a th:each="cat : ${categories}" 
-                   th:href="@{/(categoriaId=${cat.id}) + '#products-section'}" 
+                   th:href="@{/(categoriaId=${cat.id})#products-section}" 
                    th:text="${cat.nome}"
                    class="btn-filter"
                    th:classappend="${selectedCategoryId == cat.id} ? 'active'">Categoria</a>
                 
-                <a th:href="@{/(emOferta=true) + '#products-section'}" 
+                <a th:href="@{/(emOferta=true)#products-section}" 
                    class="btn-filter"
                    th:classappend="${selectedCategory == 'oferta'} ? 'active'">Ofertas</a>
             </div>

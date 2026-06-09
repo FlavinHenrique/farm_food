@@ -54,6 +54,13 @@ public class ProdutoService {
         return produtoRepository.findById(id);
     }
 
+    public List<Produto> getProdutosMesmoNome(String nome) {
+        if (nome == null) {
+            return List.of();
+        }
+        return produtoRepository.findByNome(nome);
+    }
+
     public void excluirProduto(Long id) {
         if (id != null) {
             produtoRepository.deleteById(id);
