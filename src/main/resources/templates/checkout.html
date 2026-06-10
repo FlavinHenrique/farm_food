@@ -189,7 +189,7 @@
                                     <label class="form-label">CEP *</label>
                                     <div class="input-group">
                                         <input type="text" class="form-control" id="cep" placeholder="00000-000" required>
-                                        <button class="btn btn-outline-secondary" type="button" onclick="buscarCep()">Buscar</button>
+                                        <button class="btn btn-outline-secondary" type="button" onclick="buscarCep(event)">Buscar</button>
                                     </div>
                                     <div class="error-feedback" id="cep-error">CEP não encontrado.</div>
                                 </div>
@@ -335,6 +335,7 @@
                         <span>Total</span>
                         <span id="check-total">R$ 0,00</span>
                     </div>
+                    <div id="checkout-feedback" class="alert d-none mt-3 mb-0" role="alert"></div>
                     
                     <button type="button" class="btn btn-finish" id="btn-submit-order" onclick="submitOrder()">
                         Finalizar Compra
@@ -356,7 +357,7 @@
                 <div class="modal-body">
                     <i class="bi bi-check-circle-fill success-icon"></i>
                     <h3 class="fw-bold mt-3">Pedido Confirmado!</h3>
-                    <p class="text-muted">Obrigado pela sua compra. Seu pedido #<span id="order-number">10045</span> foi registrado com sucesso.</p>
+                    <p class="text-muted">Obrigado pela sua compra. Pedido principal #<span id="order-number">10045</span> confirmado. <span id="order-summary">Tudo certo com a separacao e a entrega.</span></p>
                     <a th:href="@{/}" class="btn btn-primary-custom mt-3 w-100" onclick="clearCart()">Voltar para a Loja</a>
                 </div>
             </div>
@@ -365,354 +366,408 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Inicialização robusta do carrinho
         let cart = [];
-        try {
-            const savedCart = localStorage.getItem('farmfood_cart');
-            if (savedCart) {
-                cart = JSON.parse(savedCart);
-                console.log('Carrinho carregado com sucesso:', cart);
-            } else {
-                console.warn('Nenhum carrinho encontrado no localStorage.');
-            }
-        } catch (e) {
-            console.error('Erro crítico ao ler o carrinho do localStorage:', e);
-            cart = [];
-        }
-
         let subtotal = 0;
-        const shipping = 15.90; // Frete fixo
+        let shipping = 15.90;
         let discount = 0;
         let total = 0;
+        let selectedAddressId = null;
+
+        function byId(id) {
+            return document.getElementById(id);
+        }
+
+        function readCart() {
+            try {
+                const savedCart = localStorage.getItem('farmfood_cart');
+                const parsed = savedCart ? JSON.parse(savedCart) : [];
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (_) {
+                return [];
+            }
+        }
 
         function formatCurrency(val) {
-            try {
-                const num = parseFloat(val);
-                if (isNaN(num)) return 'R$ 0,00';
-                return 'R$ ' + num.toFixed(2).replace('.', ',');
-            } catch (e) {
-                return 'R$ 0,00';
+            const num = Number(val || 0);
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(num);
+        }
+
+        function showFeedback(message, type) {
+            const feedback = byId('checkout-feedback');
+            if (!feedback) {
+                return;
             }
+            if (!message) {
+                feedback.className = 'alert d-none mt-3 mb-0';
+                feedback.textContent = '';
+                return;
+            }
+            feedback.className = `alert alert-${type || 'info'} mt-3 mb-0`;
+            feedback.textContent = message;
+        }
+
+        function parsePrice(raw) {
+            if (typeof raw === 'number') {
+                return raw;
+            }
+            return Number(String(raw || '0').replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.')) || 0;
         }
 
         function loadCheckout() {
-            console.log('Iniciando carregamento do checkout...');
-            const container = document.getElementById('checkout-items');
+            const container = byId('checkout-items');
             if (!container) {
-                console.error('ERRO: Elemento "checkout-items" não encontrado!');
                 return;
             }
 
-            try {
-                if (!Array.isArray(cart) || cart.length === 0) {
-                    console.warn('Carrinho vazio ou não encontrado.');
-                    container.innerHTML = '<p class="text-muted text-center py-3">Seu carrinho está vazio.</p>';
-                    // Redireciona apenas se não for teste
-                    if (!window.location.href.includes('localhost') || window.location.pathname !== '/checkout') {
-                         // window.location.href = '/cart';
-                    }
-                    return;
-                }
-                
-                container.innerHTML = '';
+            cart = readCart();
+            if (!cart.length) {
+                container.innerHTML = '<p class="text-muted text-center py-3">Seu carrinho esta vazio.</p>';
                 subtotal = 0;
-
-                cart.forEach((item, index) => {
-                    console.log(`Processando item [${index}]:`, item);
-                    let price = 0;
-                    if (typeof item.price === 'string') {
-                        price = parseFloat(item.price.replace('R$', '').replace(/\s/g, '').replace(',', '.')) || 0;
-                    } else {
-                        price = parseFloat(item.price) || 0;
-                    }
-                    
-                    const qty = parseInt(item.qty) || 0;
-                    const itemTotal = price * qty;
-                    
-                    subtotal += itemTotal;
-                    container.innerHTML += `
-                        <div class="summary-item">
-                            <span class="summary-item-name">${qty}x ${item.name}</span>
-                            <span class="fw-medium">${formatCurrency(itemTotal)}</span>
-                        </div>
-                    `;
-                });
-
-                console.log('Subtotal final:', subtotal);
                 updateTotals();
-            } catch (err) {
-                console.error('ERRO CRÍTICO no loadCheckout:', err);
-                container.innerHTML = '<p class="text-danger small">Erro ao carregar itens do pedido.</p>';
+                const submitButton = byId('btn-submit-order');
+                if (submitButton) {
+                    submitButton.disabled = true;
+                }
+                return;
             }
+
+            const fragment = document.createDocumentFragment();
+            subtotal = 0;
+
+            cart.forEach((item) => {
+                const qty = Math.max(1, Number(item.qty) || 1);
+                const price = parsePrice(item.price);
+                const itemTotal = price * qty;
+                subtotal += itemTotal;
+
+                const row = document.createElement('div');
+                row.className = 'summary-item';
+                row.innerHTML = `
+                    <span class="summary-item-name">${qty}x ${item.name || 'Produto'}</span>
+                    <span class="fw-medium">${formatCurrency(itemTotal)}</span>
+                `;
+                fragment.appendChild(row);
+            });
+
+            container.innerHTML = '';
+            container.appendChild(fragment);
+            updateTotals();
         }
 
-        // Funções para Endereços Salvos
-        let selectedAddressId = null;
-
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             const card = e.target.closest('.saved-address-card');
-            if (card) {
-                // Remove seleção de outros cards
-                document.querySelectorAll('.address-selection-card').forEach(c => c.classList.remove('selected'));
-                card.classList.add('selected');
-
-                selectedAddressId = card.dataset.id;
-
-                // Preenche os campos
-                const cep = card.dataset.cep || '';
-                const rua = card.dataset.rua || '';
-                const numero = card.dataset.numero || '';
-                const complemento = card.dataset.complemento || '';
-                const bairro = card.dataset.bairro || '';
-                const cidade = card.dataset.cidade || '';
-                const estado = card.dataset.estado || '';
-
-                const cepEl = document.getElementById('cep');
-                const logradouroEl = document.getElementById('logradouro');
-                const numeroEl = document.getElementById('numero');
-                const complementoEl = document.getElementById('complemento');
-                const bairroEl = document.getElementById('bairro');
-                const cidadeUfEl = document.getElementById('cidade_uf');
-
-                if (cepEl) cepEl.value = cep;
-                if (logradouroEl) logradouroEl.value = rua;
-                if (numeroEl) numeroEl.value = numero;
-                if (complementoEl) complementoEl.value = (complemento && complemento !== 'null') ? complemento : '';
-                if (bairroEl) bairroEl.value = bairro;
-                if (cidadeUfEl) cidadeUfEl.value = (cidade && estado) ? `${cidade} / ${estado}` : (cidade || estado || '');
-
-                // Esconde o formulário
-                const formContainer = document.getElementById('address-form-container');
-                const saveCheckbox = document.getElementById('save-address-checkbox');
-                if (formContainer) formContainer.classList.add('d-none');
-                if (saveCheckbox) saveCheckbox.classList.add('d-none');
+            if (!card) {
+                return;
             }
+
+            document.querySelectorAll('.address-selection-card').forEach((item) => item.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedAddressId = Number(card.dataset.id) || null;
+
+            byId('cep').value = card.dataset.cep || '';
+            byId('logradouro').value = card.dataset.rua || '';
+            byId('numero').value = card.dataset.numero || '';
+            byId('complemento').value = (card.dataset.complemento && card.dataset.complemento !== 'null') ? card.dataset.complemento : '';
+            byId('bairro').value = card.dataset.bairro || '';
+            byId('cidade_uf').value = (card.dataset.cidade && card.dataset.estado)
+                ? `${card.dataset.cidade} / ${card.dataset.estado}`
+                : (card.dataset.cidade || card.dataset.estado || '');
+
+            byId('address-form-container')?.classList.add('d-none');
+            byId('save-address-checkbox')?.classList.add('d-none');
         });
 
         function showNewAddressForm() {
             selectedAddressId = null;
-            document.querySelectorAll('.address-selection-card').forEach(c => c.classList.remove('selected'));
-            
-            // Limpa os campos
-            document.getElementById('cep').value = '';
-            document.getElementById('logradouro').value = '';
-            document.getElementById('numero').value = '';
-            document.getElementById('complemento').value = '';
-            document.getElementById('bairro').value = '';
-            document.getElementById('cidade_uf').value = '';
+            document.querySelectorAll('.address-selection-card').forEach((item) => item.classList.remove('selected'));
 
-            document.getElementById('address-form-container').classList.remove('d-none');
-            document.getElementById('save-address-checkbox').classList.remove('d-none');
-            
-            // Scroll suave para o formulário
-            document.getElementById('address-form-container').scrollIntoView({ behavior: 'smooth' });
+            byId('cep').value = '';
+            byId('logradouro').value = '';
+            byId('numero').value = '';
+            byId('complemento').value = '';
+            byId('bairro').value = '';
+            byId('cidade_uf').value = '';
+
+            byId('address-form-container')?.classList.remove('d-none');
+            byId('save-address-checkbox')?.classList.remove('d-none');
+            byId('address-form-container')?.scrollIntoView({ behavior: 'smooth' });
         }
 
         function hideNewAddressForm() {
-            document.getElementById('address-form-container').classList.add('d-none');
-            document.getElementById('save-address-checkbox').classList.add('d-none');
-            document.getElementById('saved-addresses-section').scrollIntoView({ behavior: 'smooth' });
+            byId('address-form-container')?.classList.add('d-none');
+            byId('save-address-checkbox')?.classList.add('d-none');
+            byId('saved-addresses-section')?.scrollIntoView({ behavior: 'smooth' });
         }
 
-        function buscarCep() {
-            const cep = document.getElementById('cep').value.replace(/\D/g, '');
-            const errorElement = document.getElementById('cep-error');
-            
+        function buscarCep(clickEvent) {
+            const cep = byId('cep').value.replace(/\D/g, '');
+            const errorElement = byId('cep-error');
             if (cep.length !== 8) {
-                errorElement.innerText = "CEP inválido. Digite 8 números.";
+                errorElement.innerText = 'CEP invalido. Digite 8 numeros.';
                 errorElement.style.display = 'block';
                 return;
             }
 
             errorElement.style.display = 'none';
-            const btn = event.target;
-            const originalText = btn.innerText;
-            btn.disabled = true;
-            btn.innerText = '...';
+            const btn = clickEvent?.target;
+            const originalText = btn ? btn.innerText : 'Buscar';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = '...';
+            }
 
             fetch(`https://viacep.com.br/ws/${cep}/json/`)
-                .then(response => response.json())
-                .then(data => {
+                .then((response) => response.json())
+                .then((data) => {
                     if (data.erro) {
-                        errorElement.innerText = "CEP não encontrado.";
+                        errorElement.innerText = 'CEP nao encontrado.';
                         errorElement.style.display = 'block';
-                    } else {
-                        document.getElementById('logradouro').value = data.logradouro;
-                        document.getElementById('bairro').value = data.bairro;
-                        document.getElementById('cidade_uf').value = `${data.localidade} / ${data.uf}`;
-                        document.getElementById('numero').focus();
+                        return;
                     }
+                    byId('logradouro').value = data.logradouro || '';
+                    byId('bairro').value = data.bairro || '';
+                    byId('cidade_uf').value = `${data.localidade || ''} / ${data.uf || ''}`.trim();
+                    byId('numero').focus();
                 })
-                .catch(error => {
-                    console.error('Erro ao buscar CEP:', error);
-                    errorElement.innerText = "Erro ao consultar o serviço.";
+                .catch(() => {
+                    errorElement.innerText = 'Erro ao consultar o servico.';
                     errorElement.style.display = 'block';
                 })
                 .finally(() => {
-                    btn.disabled = false;
-                    btn.innerText = originalText;
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerText = originalText;
+                    }
                 });
         }
 
         function updateTotals() {
-            console.log('Atualizando totais...');
-            try {
-                const subtotalEl = document.getElementById('check-subtotal');
-                const discountEl = document.getElementById('check-discount');
-                const totalEl = document.getElementById('check-total');
-                const shippingEl = document.getElementById('check-shipping');
-                const discountRow = document.getElementById('check-discount-row');
+            const isPix = byId('pay-pix')?.checked;
+            discount = isPix ? subtotal * 0.05 : 0;
+            total = Math.max(0, subtotal + shipping - discount);
 
-                const payPix = document.getElementById('pay-pix');
-                const isPix = payPix ? payPix.checked : false;
-                
-                if (isPix) {
-                    discount = subtotal * 0.05;
-                    if (discountRow) discountRow.classList.remove('d-none');
-                } else {
-                    discount = 0;
-                    if (discountRow) discountRow.classList.add('d-none');
-                }
+            byId('check-subtotal').innerText = formatCurrency(subtotal);
+            byId('check-discount').innerText = `- ${formatCurrency(discount)}`;
+            byId('check-shipping').innerText = formatCurrency(shipping);
+            byId('check-total').innerText = formatCurrency(total);
+            byId('check-discount-row').classList.toggle('d-none', !isPix);
 
-                total = subtotal + shipping - discount;
-                if (total < 0) total = 0;
-
-                if (subtotalEl) subtotalEl.innerText = formatCurrency(subtotal);
-                if (discountEl) discountEl.innerText = '- ' + formatCurrency(discount);
-                if (shippingEl) shippingEl.innerText = formatCurrency(shipping);
-                if (totalEl) totalEl.innerText = formatCurrency(total);
-                
-                // Atualiza parcelas
-                const parcelasSelect = document.getElementById('cc-parcelas');
-                if (parcelasSelect && parcelasSelect.options && parcelasSelect.options.length > 0) {
-                    const maxParcelas = Math.min(parcelasSelect.options.length, 3);
-                    for (let i = 1; i <= maxParcelas; i++) {
-                        parcelasSelect.options[i-1].text = `${i}x de ${formatCurrency(total/i)} sem juros`;
-                    }
-                }
-            } catch (err) {
-                console.error('ERRO ao atualizar totais:', err);
+            const parcelasSelect = byId('cc-parcelas');
+            if (parcelasSelect) {
+                Array.from(parcelasSelect.options).forEach((option, index) => {
+                    const parcela = index + 1;
+                    option.text = `${parcela}x de ${formatCurrency(total / parcela)} sem juros`;
+                });
             }
         }
 
         function togglePaymentView() {
-            const isCard = document.getElementById('pay-card').checked;
-            const isPix = document.getElementById('pay-pix').checked;
-            
-            document.getElementById('card-details').classList.toggle('d-none', !isCard);
-            document.getElementById('pix-details').classList.toggle('d-none', !isPix);
-            
+            const isCard = byId('pay-card').checked;
+            const isPix = byId('pay-pix').checked;
+
+            byId('card-details').classList.toggle('d-none', !isCard);
+            byId('pix-details').classList.toggle('d-none', !isPix);
             updateTotals();
         }
 
-        // Navegação de passos
+        function validateRequiredFields(stepContainer) {
+            const inputs = stepContainer.querySelectorAll('[required]');
+            let isValid = true;
+            inputs.forEach((input) => {
+                const hiddenByContainer = input.closest('.d-none');
+                if (hiddenByContainer && hiddenByContainer.id === 'address-form-container' && selectedAddressId) {
+                    input.classList.remove('is-invalid');
+                    return;
+                }
+                if (!input.value || !String(input.value).trim()) {
+                    input.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            });
+            return isValid;
+        }
+
         function nextStep(current) {
-            try {
-                const stepContainer = document.getElementById(`step-${current}`);
-                if (!stepContainer) return;
-
-                const inputs = stepContainer.querySelectorAll('[required]');
-                let isValid = true;
-                
-                inputs.forEach(input => {
-                    if(!input.value || !input.value.trim()) {
-                        input.classList.add('is-invalid');
-                        isValid = false;
-                    } else {
-                        input.classList.remove('is-invalid');
-                    }
-                });
-                
-                if(!isValid) return;
-
-                const nextStepContainer = document.getElementById(`step-${current+1}`);
-                if (!nextStepContainer) return;
-
-                stepContainer.classList.add('d-none');
-                nextStepContainer.classList.remove('d-none');
-                
-                const currentIndicator = document.getElementById(`step-indicator-${current}`);
-                const nextIndicator = document.getElementById(`step-indicator-${current+1}`);
-                
-                if (currentIndicator) {
-                    currentIndicator.classList.remove('active');
-                    currentIndicator.classList.add('completed');
-                }
-                if (nextIndicator) {
-                    nextIndicator.classList.add('active');
-                }
-                
-                window.scrollTo(0,0);
-            } catch (err) {
-                console.error('Erro ao navegar para o próximo passo:', err);
+            const currentStep = byId(`step-${current}`);
+            const nextStepContainer = byId(`step-${current + 1}`);
+            if (!currentStep || !nextStepContainer) {
+                return;
             }
+            if (!validateRequiredFields(currentStep)) {
+                showFeedback('Preencha os campos obrigatorios antes de continuar.', 'warning');
+                return;
+            }
+
+            currentStep.classList.add('d-none');
+            nextStepContainer.classList.remove('d-none');
+            byId(`step-indicator-${current}`).classList.remove('active');
+            byId(`step-indicator-${current}`).classList.add('completed');
+            byId(`step-indicator-${current + 1}`).classList.add('active');
+            showFeedback('', 'info');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function prevStep(current) {
-            document.getElementById(`step-${current}`).classList.add('d-none');
-            document.getElementById(`step-${current-1}`).classList.remove('d-none');
-            
-            document.getElementById(`step-indicator-${current}`).classList.remove('active');
-            document.getElementById(`step-indicator-${current-1}`).classList.add('active');
-            document.getElementById(`step-indicator-${current-1}`).classList.remove('completed');
+            byId(`step-${current}`).classList.add('d-none');
+            byId(`step-${current - 1}`).classList.remove('d-none');
+            byId(`step-indicator-${current}`).classList.remove('active');
+            byId(`step-indicator-${current - 1}`).classList.add('active');
+            byId(`step-indicator-${current - 1}`).classList.remove('completed');
         }
 
-        // Submit Final
-        function submitOrder() {
-            const btn = document.getElementById('btn-submit-order');
-            if (!btn) return;
-            
-            // Validação Cartão se selecionado
-            const payCard = document.getElementById('pay-card');
-            if(payCard && payCard.checked) {
-                const ccNum = document.getElementById('cc-numero');
-                if(ccNum && !ccNum.value) {
-                    ccNum.classList.add('is-invalid');
-                    return;
+        function validateCardFields() {
+            const cardFields = ['cc-numero', 'cc-nome', 'cc-validade', 'cc-cvv'];
+            let valid = true;
+            cardFields.forEach((fieldId) => {
+                const field = byId(fieldId);
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    valid = false;
+                } else {
+                    field.classList.remove('is-invalid');
                 }
+            });
+            return valid;
+        }
+
+        function getSelectedPaymentMethod() {
+            return document.querySelector('input[name="pagamento"]:checked')?.value || 'pix';
+        }
+
+        function splitCityUf(rawValue) {
+            const [cidade, estado] = String(rawValue || '').split('/').map((part) => part.trim());
+            return {
+                cidade: cidade || '',
+                estado: estado || ''
+            };
+        }
+
+        function buildCheckoutPayload() {
+            const cidadeUf = splitCityUf(byId('cidade_uf').value);
+            const payloadItems = cart
+                .map((item) => ({
+                    productId: Number(item.id),
+                    quantity: Math.max(1, Number(item.qty) || 1)
+                }))
+                .filter((item) => Number.isFinite(item.productId) && item.productId > 0);
+
+            return {
+                nome: byId('nome').value.trim(),
+                email: byId('email').value.trim(),
+                cpf: byId('cpf').value.trim(),
+                telefone: byId('telefone').value.trim(),
+                enderecoId: selectedAddressId,
+                salvarNovoEndereco: Boolean(byId('save-new-address')?.checked) && !selectedAddressId,
+                apelidoEndereco: selectedAddressId ? null : 'Entrega',
+                cep: byId('cep').value.trim(),
+                logradouro: byId('logradouro').value.trim(),
+                numero: byId('numero').value.trim(),
+                complemento: byId('complemento').value.trim(),
+                bairro: byId('bairro').value.trim(),
+                cidade: cidadeUf.cidade,
+                estado: cidadeUf.estado,
+                metodoPagamento: getSelectedPaymentMethod(),
+                shipping,
+                discount,
+                items: payloadItems
+            };
+        }
+
+        async function submitOrder() {
+            const btn = byId('btn-submit-order');
+            if (!btn) {
+                return;
+            }
+            if (!validateRequiredFields(byId('step-3'))) {
+                showFeedback('Revise os dados do pagamento antes de finalizar.', 'warning');
+                return;
+            }
+            if (byId('pay-card').checked && !validateCardFields()) {
+                showFeedback('Preencha os dados do cartao para concluir a compra.', 'warning');
+                return;
+            }
+            if (!cart.length) {
+                showFeedback('Seu carrinho esta vazio.', 'warning');
+                return;
+            }
+
+            const payload = buildCheckoutPayload();
+            if (!payload.items.length) {
+                showFeedback('Nao foi possivel montar os itens do pedido.', 'danger');
+                return;
             }
 
             btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processando...';
             btn.disabled = true;
+            showFeedback('', 'info');
 
-            setTimeout(() => {
-                const modalEl = document.getElementById('successModal');
-                if (modalEl) {
-                    const modal = new bootstrap.Modal(modalEl);
-                    const orderNumEl = document.getElementById('order-number');
-                    if (orderNumEl) orderNumEl.innerText = Math.floor(Math.random() * 90000) + 10000;
-                    modal.show();
+            try {
+                const response = await fetch('/api/orders/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const message = await response.text();
+                    throw new Error(message || 'Nao foi possivel finalizar o pedido.');
                 }
-            }, 1500);
+
+                const result = await response.json();
+                clearCart();
+                const orderNumEl = byId('order-number');
+                const orderSummaryEl = byId('order-summary');
+                if (orderNumEl) {
+                    orderNumEl.innerText = result.primeiroPedidoId || '-';
+                }
+                if (orderSummaryEl) {
+                    orderSummaryEl.innerText = `${result.quantidadePedidos || 0} pedido(s) gerado(s) e encaminhado(s) para separacao e entrega.`;
+                }
+
+                const modalEl = byId('successModal');
+                if (modalEl) {
+                    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                }
+            } catch (error) {
+                showFeedback(error.message || 'Falha ao finalizar a compra.', 'danger');
+            } finally {
+                btn.innerHTML = 'Finalizar Compra';
+                btn.disabled = false;
+            }
         }
 
         function clearCart() {
             localStorage.removeItem('farmfood_cart');
+            cart = [];
         }
 
-        // Inicialização quando o DOM estiver pronto
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM carregado, inicializando checkout...');
-            
-            // Máscaras simples com verificação de existência
-            const cpfEl = document.getElementById('cpf');
+        document.addEventListener('DOMContentLoaded', function () {
+            const cpfEl = byId('cpf');
             if (cpfEl) {
-                cpfEl.addEventListener('input', function(e) {
-                    var x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,3})(\d{0,2})/);
-                    e.target.value = !x[2] ? x[1] : x[1] + '.' + x[2] + (x[3] ? '.' + x[3] : '') + (x[4] ? '-' + x[4] : '');
-                });
-            }
-            
-            const telEl = document.getElementById('telefone');
-            if (telEl) {
-                telEl.addEventListener('input', function(e) {
-                    var x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
-                    e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+                cpfEl.addEventListener('input', function (e) {
+                    const match = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,3})(\d{0,2})/);
+                    e.target.value = !match[2] ? match[1] : match[1] + '.' + match[2] + (match[3] ? '.' + match[3] : '') + (match[4] ? '-' + match[4] : '');
                 });
             }
 
-            // Inicia a página
+            const telEl = byId('telefone');
+            if (telEl) {
+                telEl.addEventListener('input', function (e) {
+                    const match = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+                    e.target.value = !match[2] ? match[1] : '(' + match[1] + ') ' + match[2] + (match[3] ? '-' + match[3] : '');
+                });
+            }
+
             loadCheckout();
+            togglePaymentView();
         });
     </script>
 </body>

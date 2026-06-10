@@ -38,6 +38,11 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
+    public Usuario registrarEntregador(Usuario usuario) {
+        usuario.setPapel(PapelUsuario.ENTREGADOR);
+        return usuarioRepository.save(usuario);
+    }
+
     public Usuario atualizar(Usuario usuario) {
         return usuarioRepository.save(usuario);
     }

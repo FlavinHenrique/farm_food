@@ -23,6 +23,40 @@ public class Pedido {
     private LocalDateTime dataPedido;
     private BigDecimal valorTotal;
     private String status; // ex: "Pendente", "Finalizado", "Cancelado"
+
+    @ManyToOne
+    @JoinColumn(name = "entregador_id")
+    private Usuario entregador;
+
+    @Enumerated(EnumType.STRING)
+    private StatusEntrega statusEntrega;
+
+    private LocalDateTime prazoEntrega;
+    private LocalDateTime inicioRotaEm;
+    private LocalDateTime chegadaDestinoEm;
+    private LocalDateTime entregueEm;
+
+    private String regiaoEntrega;
+    private String cepEntrega;
+    private String logradouroEntrega;
+    private String numeroEntrega;
+    private String complementoEntrega;
+    private String bairroEntrega;
+    private String cidadeEntrega;
+    private String estadoEntrega;
+    private BigDecimal valorFrete;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String comprovanteEntrega;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String assinaturaEntrega;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String ocorrenciaEntrega;
     
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
     private List<ItemPedido> itens;
@@ -52,4 +86,40 @@ public class Pedido {
     public void setStatus(String status) { this.status = status; }
     public List<ItemPedido> getItens() { return itens; }
     public void setItens(List<ItemPedido> itens) { this.itens = itens; }
+    public Usuario getEntregador() { return entregador; }
+    public void setEntregador(Usuario entregador) { this.entregador = entregador; }
+    public StatusEntrega getStatusEntrega() { return statusEntrega; }
+    public void setStatusEntrega(StatusEntrega statusEntrega) { this.statusEntrega = statusEntrega; }
+    public LocalDateTime getPrazoEntrega() { return prazoEntrega; }
+    public void setPrazoEntrega(LocalDateTime prazoEntrega) { this.prazoEntrega = prazoEntrega; }
+    public LocalDateTime getInicioRotaEm() { return inicioRotaEm; }
+    public void setInicioRotaEm(LocalDateTime inicioRotaEm) { this.inicioRotaEm = inicioRotaEm; }
+    public LocalDateTime getChegadaDestinoEm() { return chegadaDestinoEm; }
+    public void setChegadaDestinoEm(LocalDateTime chegadaDestinoEm) { this.chegadaDestinoEm = chegadaDestinoEm; }
+    public LocalDateTime getEntregueEm() { return entregueEm; }
+    public void setEntregueEm(LocalDateTime entregueEm) { this.entregueEm = entregueEm; }
+    public String getRegiaoEntrega() { return regiaoEntrega; }
+    public void setRegiaoEntrega(String regiaoEntrega) { this.regiaoEntrega = regiaoEntrega; }
+    public String getCepEntrega() { return cepEntrega; }
+    public void setCepEntrega(String cepEntrega) { this.cepEntrega = cepEntrega; }
+    public String getLogradouroEntrega() { return logradouroEntrega; }
+    public void setLogradouroEntrega(String logradouroEntrega) { this.logradouroEntrega = logradouroEntrega; }
+    public String getNumeroEntrega() { return numeroEntrega; }
+    public void setNumeroEntrega(String numeroEntrega) { this.numeroEntrega = numeroEntrega; }
+    public String getComplementoEntrega() { return complementoEntrega; }
+    public void setComplementoEntrega(String complementoEntrega) { this.complementoEntrega = complementoEntrega; }
+    public String getBairroEntrega() { return bairroEntrega; }
+    public void setBairroEntrega(String bairroEntrega) { this.bairroEntrega = bairroEntrega; }
+    public String getCidadeEntrega() { return cidadeEntrega; }
+    public void setCidadeEntrega(String cidadeEntrega) { this.cidadeEntrega = cidadeEntrega; }
+    public String getEstadoEntrega() { return estadoEntrega; }
+    public void setEstadoEntrega(String estadoEntrega) { this.estadoEntrega = estadoEntrega; }
+    public BigDecimal getValorFrete() { return valorFrete; }
+    public void setValorFrete(BigDecimal valorFrete) { this.valorFrete = valorFrete; }
+    public String getComprovanteEntrega() { return comprovanteEntrega; }
+    public void setComprovanteEntrega(String comprovanteEntrega) { this.comprovanteEntrega = comprovanteEntrega; }
+    public String getAssinaturaEntrega() { return assinaturaEntrega; }
+    public void setAssinaturaEntrega(String assinaturaEntrega) { this.assinaturaEntrega = assinaturaEntrega; }
+    public String getOcorrenciaEntrega() { return ocorrenciaEntrega; }
+    public void setOcorrenciaEntrega(String ocorrenciaEntrega) { this.ocorrenciaEntrega = ocorrenciaEntrega; }
 }

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.foodfarmer.foodfarmer.model.PapelUsuario;
 import com.foodfarmer.foodfarmer.model.Usuario;
 import com.foodfarmer.foodfarmer.service.AutenticacaoService;
 import com.foodfarmer.foodfarmer.service.UsuarioService;
@@ -26,7 +27,7 @@ public class LoginController {
     @GetMapping("/login")
     public String showLoginForm(@RequestParam(required = false) String redirect, Model model) {
         if (autenticacaoService.estaLogado()) {
-            return "redirect:" + (redirect != null ? redirect : "/");
+            return "redirect:" + resolveDefaultRedirect(autenticacaoService.getUsuarioAtual().orElse(null), redirect);
         }
         model.addAttribute("redirect", redirect);
         return "login";
@@ -42,10 +43,7 @@ public class LoginController {
         
         if (userOpt.isPresent() && userOpt.get().getSenha().equals(password)) {
             autenticacaoService.login(userOpt.get());
-            if (redirect != null && !redirect.isEmpty()) {
-                return "redirect:" + redirect;
-            }
-            return "redirect:/";
+            return "redirect:" + resolveDefaultRedirect(userOpt.get(), redirect);
         }
         
         model.addAttribute("error", "E-mail ou senha inválidos");
@@ -57,5 +55,21 @@ public class LoginController {
     public String logout() {
         autenticacaoService.logout();
         return "redirect:/?logout=true";
+    }
+
+    private String resolveDefaultRedirect(Usuario usuario, String redirect) {
+        if (redirect != null && !redirect.isBlank()) {
+            return redirect;
+        }
+        if (usuario == null || usuario.getPapel() == null) {
+            return "/";
+        }
+        if (usuario.getPapel() == PapelUsuario.PRODUTOR) {
+            return "/producer/dashboard";
+        }
+        if (usuario.getPapel() == PapelUsuario.ENTREGADOR) {
+            return "/delivery/dashboard";
+        }
+        return "/customer/profile";
     }
 }
