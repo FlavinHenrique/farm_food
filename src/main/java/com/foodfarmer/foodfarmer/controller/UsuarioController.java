@@ -64,4 +64,22 @@ public class UsuarioController {
             return "register-producer";
         }
     }
+
+    @GetMapping("/register/delivery")
+    public String showDeliveryRegistrationForm(Model model) {
+        model.addAttribute("user", new Usuario());
+        return "register-delivery";
+    }
+
+    @PostMapping("/register/delivery")
+    public String registerDelivery(@ModelAttribute("user") Usuario user, Model model) {
+        try {
+            Usuario salvo = usuarioService.registrarEntregador(user);
+            autenticacaoService.login(salvo);
+            return "redirect:/delivery/dashboard?registered=true";
+        } catch (Exception e) {
+            model.addAttribute("error", "Este e-mail jÃ¡ estÃ¡ cadastrado.");
+            return "register-delivery";
+        }
+    }
 }
