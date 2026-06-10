@@ -105,7 +105,7 @@
                         </div>
                         <h4 class="fw-bold mb-2" th:text="${store.nome}">Nome da Fazenda</h4>
                         <p class="text-muted small mb-4" th:text="${store.descricao}">Descrição da fazenda e seus métodos de cultivo orgânico...</p>
-                        <a href="#" class="btn btn-outline-success w-100 rounded-pill fw-bold">Ver todos produtos</a>
+                        <a th:href="@{'/loja/' + ${store.id}}" class="btn btn-outline-success w-100 rounded-pill fw-bold">Ver todos produtos</a>
                     </div>
                 </div>
             </div>

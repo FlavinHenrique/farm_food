@@ -139,8 +139,15 @@
                             <p class="text-muted small mb-3">Selecione um endereço salvo ou cadastre um novo:</p>
                             <div class="row g-3">
                                 <div class="col-md-6" th:each="addr : ${addresses}">
-                                    <div class="card h-100 address-selection-card" 
-                                         th:onclick="'selectSavedAddress(this, ' + ${addr.id} + ', \'' + ${addr.cep} + '\', \'' + ${addr.rua} + '\', \'' + ${addr.numero} + '\', \'' + ${addr.complemento} + '\', \'' + ${addr.bairro} + '\', \'' + ${addr.cidade} + '\', \'' + ${addr.estado} + '\')'"
+                                    <div class="card h-100 address-selection-card saved-address-card" 
+                                         th:data-id="${addr.id}"
+                                         th:data-cep="${addr.cep}"
+                                         th:data-rua="${addr.rua}"
+                                         th:data-numero="${addr.numero}"
+                                         th:data-complemento="${addr.complemento}"
+                                         th:data-bairro="${addr.bairro}"
+                                         th:data-cidade="${addr.cidade}"
+                                         th:data-estado="${addr.estado}"
                                          style="cursor: pointer; border: 2px solid #eee; border-radius: 15px; transition: all 0.2s;">
                                         <div class="card-body">
                                             <div class="d-flex justify-content-between align-items-start">
@@ -390,19 +397,20 @@
 
         function loadCheckout() {
             console.log('Iniciando carregamento do checkout...');
+            const container = document.getElementById('checkout-items');
+            if (!container) {
+                console.error('ERRO: Elemento "checkout-items" não encontrado!');
+                return;
+            }
+
             try {
                 if (!Array.isArray(cart) || cart.length === 0) {
-                    console.warn('Carrinho vazio, redirecionando para o carrinho...');
-                    // Só redireciona se não estiver em ambiente de desenvolvimento/teste estático
-                    if (window.location.pathname !== '/checkout.html') {
-                        window.location.href = '/cart';
+                    console.warn('Carrinho vazio ou não encontrado.');
+                    container.innerHTML = '<p class="text-muted text-center py-3">Seu carrinho está vazio.</p>';
+                    // Redireciona apenas se não for teste
+                    if (!window.location.href.includes('localhost') || window.location.pathname !== '/checkout') {
+                         // window.location.href = '/cart';
                     }
-                    return;
-                }
-
-                const container = document.getElementById('checkout-items');
-                if (!container) {
-                    console.error('Elemento "checkout-items" não encontrado no DOM.');
                     return;
                 }
                 
@@ -410,7 +418,7 @@
                 subtotal = 0;
 
                 cart.forEach((item, index) => {
-                    console.log(`Processando item ${index}:`, item);
+                    console.log(`Processando item [${index}]:`, item);
                     let price = 0;
                     if (typeof item.price === 'string') {
                         price = parseFloat(item.price.replace('R$', '').replace(/\s/g, '').replace(',', '.')) || 0;
@@ -430,35 +438,56 @@
                     `;
                 });
 
-                console.log('Subtotal calculado:', subtotal);
+                console.log('Subtotal final:', subtotal);
                 updateTotals();
             } catch (err) {
-                console.error('Erro geral no loadCheckout:', err);
+                console.error('ERRO CRÍTICO no loadCheckout:', err);
+                container.innerHTML = '<p class="text-danger small">Erro ao carregar itens do pedido.</p>';
             }
         }
 
         // Funções para Endereços Salvos
         let selectedAddressId = null;
 
-        function selectSavedAddress(card, id, cep, rua, numero, complemento, bairro, cidade, estado) {
-            // Remove seleção de outros cards
-            document.querySelectorAll('.address-selection-card').forEach(c => c.classList.remove('selected'));
-            card.classList.add('selected');
+        document.addEventListener('click', function(e) {
+            const card = e.target.closest('.saved-address-card');
+            if (card) {
+                // Remove seleção de outros cards
+                document.querySelectorAll('.address-selection-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
 
-            selectedAddressId = id;
+                selectedAddressId = card.dataset.id;
 
-            // Preenche os campos ocultos ou visíveis para garantir que os dados estejam lá
-            document.getElementById('cep').value = cep;
-            document.getElementById('logradouro').value = rua;
-            document.getElementById('numero').value = numero;
-            document.getElementById('complemento').value = (complemento && complemento !== 'null') ? complemento : '';
-            document.getElementById('bairro').value = bairro;
-            document.getElementById('cidade_uf').value = `${cidade} / ${estado}`;
+                // Preenche os campos
+                const cep = card.dataset.cep || '';
+                const rua = card.dataset.rua || '';
+                const numero = card.dataset.numero || '';
+                const complemento = card.dataset.complemento || '';
+                const bairro = card.dataset.bairro || '';
+                const cidade = card.dataset.cidade || '';
+                const estado = card.dataset.estado || '';
 
-            // Esconde o formulário se estiver aberto
-            document.getElementById('address-form-container').classList.add('d-none');
-            document.getElementById('save-address-checkbox').classList.add('d-none');
-        }
+                const cepEl = document.getElementById('cep');
+                const logradouroEl = document.getElementById('logradouro');
+                const numeroEl = document.getElementById('numero');
+                const complementoEl = document.getElementById('complemento');
+                const bairroEl = document.getElementById('bairro');
+                const cidadeUfEl = document.getElementById('cidade_uf');
+
+                if (cepEl) cepEl.value = cep;
+                if (logradouroEl) logradouroEl.value = rua;
+                if (numeroEl) numeroEl.value = numero;
+                if (complementoEl) complementoEl.value = (complemento && complemento !== 'null') ? complemento : '';
+                if (bairroEl) bairroEl.value = bairro;
+                if (cidadeUfEl) cidadeUfEl.value = (cidade && estado) ? `${cidade} / ${estado}` : (cidade || estado || '');
+
+                // Esconde o formulário
+                const formContainer = document.getElementById('address-form-container');
+                const saveCheckbox = document.getElementById('save-address-checkbox');
+                if (formContainer) formContainer.classList.add('d-none');
+                if (saveCheckbox) saveCheckbox.classList.add('d-none');
+            }
+        });
 
         function showNewAddressForm() {
             selectedAddressId = null;
@@ -528,44 +557,41 @@
         function updateTotals() {
             console.log('Atualizando totais...');
             try {
+                const subtotalEl = document.getElementById('check-subtotal');
+                const discountEl = document.getElementById('check-discount');
+                const totalEl = document.getElementById('check-total');
+                const shippingEl = document.getElementById('check-shipping');
+                const discountRow = document.getElementById('check-discount-row');
+
                 const payPix = document.getElementById('pay-pix');
                 const isPix = payPix ? payPix.checked : false;
                 
-                // Desconto de 5% no PIX
                 if (isPix) {
                     discount = subtotal * 0.05;
-                    const discountRow = document.getElementById('check-discount-row');
                     if (discountRow) discountRow.classList.remove('d-none');
                 } else {
                     discount = 0;
-                    const discountRow = document.getElementById('check-discount-row');
                     if (discountRow) discountRow.classList.add('d-none');
                 }
 
                 total = subtotal + shipping - discount;
                 if (total < 0) total = 0;
 
-                console.log(`Valores: Subtotal=${subtotal}, Frete=${shipping}, Desconto=${discount}, Total=${total}`);
-
-                const subtotalEl = document.getElementById('check-subtotal');
-                const discountEl = document.getElementById('check-discount');
-                const totalEl = document.getElementById('check-total');
-                const shippingEl = document.getElementById('check-shipping');
-
                 if (subtotalEl) subtotalEl.innerText = formatCurrency(subtotal);
                 if (discountEl) discountEl.innerText = '- ' + formatCurrency(discount);
                 if (shippingEl) shippingEl.innerText = formatCurrency(shipping);
                 if (totalEl) totalEl.innerText = formatCurrency(total);
                 
-                // Atualiza opções de parcelamento no cartão
+                // Atualiza parcelas
                 const parcelasSelect = document.getElementById('cc-parcelas');
-                if (parcelasSelect && parcelasSelect.options) {
-                    for (let i = 1; i <= Math.min(parcelasSelect.options.length, 3); i++) {
+                if (parcelasSelect && parcelasSelect.options && parcelasSelect.options.length > 0) {
+                    const maxParcelas = Math.min(parcelasSelect.options.length, 3);
+                    for (let i = 1; i <= maxParcelas; i++) {
                         parcelasSelect.options[i-1].text = `${i}x de ${formatCurrency(total/i)} sem juros`;
                     }
                 }
             } catch (err) {
-                console.error('Erro ao atualizar totais:', err);
+                console.error('ERRO ao atualizar totais:', err);
             }
         }
 

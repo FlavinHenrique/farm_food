@@ -27,7 +27,7 @@ public class ClienteService {
 
     public Endereco salvarEndereco(Endereco endereco) {
         if (endereco == null) {
-            throw new IllegalArgumentException("Endereço não pode ser nulo");
+            throw new IllegalArgumentException("Endereco nao pode ser nulo"); 
         }
         return enderecoRepository.save(endereco);
     }
@@ -51,25 +51,22 @@ public class ClienteService {
 
     public MetodoPagamento salvarMetodoPagamento(MetodoPagamento metodoPagamento) {
         if (metodoPagamento == null) {
-            throw new IllegalArgumentException("Método de pagamento não pode ser nulo");
+            throw new IllegalArgumentException("Metodo de pagamento nao pode ser nulo");
         }
         return metodoPagamentoRepository.save(metodoPagamento);
     }
 
     public void excluirMetodoPagamento(Long id) {
-        if (id != null) {
-            metodoPagamentoRepository.deleteById(id);
-        }
+        metodoPagamentoRepository.deleteById(id);
     }
 
     public boolean validarNumeroCartao(String numeroCartao) {
         if (numeroCartao == null) return false;
         String digitos = numeroCartao.replaceAll("\\D", "");
-        
-        // Permite números simples para teste em desenvolvimento
+
         if (digitos.equals("1234") || digitos.equals("1111") || digitos.equals("0000")) return true;
-        
-        if (digitos.length() < 13 || digitos.length() > 19) return false;
+
+        if (digitos.length() < 13 || digitos.length() > 19) return false;       
 
         int soma = 0;
         boolean alternar = false;

@@ -279,7 +279,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a th:href="@{/producer/vendas}" class="nav-link">
                         <i class="bi bi-bar-chart-line-fill"></i> Vendas
                     </a>
                 </li>
@@ -288,10 +288,10 @@
             <div class="sidebar-footer">
                 <ul class="nav-menu">
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="bi bi-chat-dots-fill"></i> Mensagens
-                        </a>
-                    </li>
+                    <a th:href="@{/producer/messages}" class="nav-link">
+                        <i class="bi bi-chat-dots-fill"></i> Mensagens
+                    </a>
+                </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link">
                             <i class="bi bi-gear-fill"></i> Configurações
@@ -340,39 +340,38 @@
                 <div class="card">
                     <div class="text-center">
                         <h2 class="card-title">Rendimentos</h2>
-                        <p class="income-label mb-1">Saved this month</p>
-                        <h3 class="income-value">$12,281</h3>
-                        <p class="income-label mb-4">Your payment will be updated by the system.</p>
+                        <p class="income-label mb-1">Faturamento Total</p>
+                        <h3 class="income-value" th:text="'R$ ' + ${totalFaturamento}">R$ 0,00</h3>
+                        <p class="income-label mb-4" th:text="${totalVendas} + ' vendas realizadas'"></p>
                     </div>
                     <canvas id="yieldChart" height="150"></canvas>
                 </div>
 
-                <!-- Lojas que mais venderam -->
+                <!-- Últimas Vendas -->
                 <div class="card">
-                    <h2 class="card-title">Lojas que mais tiveram vendas</h2>
+                    <h2 class="card-title">Últimas Vendas</h2>
                     <ul class="store-list">
-                        <li class="store-item" th:each="store, iter : ${stores}" th:if="${iter.index < 4}">
+                        <li class="store-item" th:each="venda, iter : ${vendas}" th:if="${iter.index < 4}">
                             <div class="store-info">
                                 <div class="store-img">
-                                    <i class="bi bi-shop"></i>
+                                    <i class="bi bi-receipt"></i>
                                 </div>
                                 <div>
-                                    <p class="store-name" th:text="${store.nome}">Nome da Loja</p>
-                                    <p class="store-date">12 Nov 2021 4:45AM</p>
+                                    <p class="store-name" th:text="${venda.cliente.nome}">Nome do Cliente</p>
+                                    <p class="store-date" th:text="${#temporals.format(venda.dataPedido, 'dd/MM/yyyy HH:mm')}">Data</p>
                                 </div>
                             </div>
-                            <span class="store-price">$15</span>
+                            <span class="store-price" th:text="'R$ ' + ${venda.valorTotal}">$15</span>
                         </li>
-                        <!-- Fallback static items if no stores -->
-                        <li class="store-item" th:if="${#lists.isEmpty(stores)}">
+                        <li class="store-item" th:if="${#lists.isEmpty(vendas)}">
                             <div class="store-info">
-                                <div class="store-img"><i class="bi bi-shop"></i></div>
+                                <div class="store-img"><i class="bi bi-receipt"></i></div>
                                 <div>
-                                    <p class="store-name">Nenhuma loja cadastrada</p>
-                                    <p class="store-date">Cadastre sua primeira loja</p>
+                                    <p class="store-name">Nenhuma venda realizada</p>
+                                    <p class="store-date">Aguardando pedidos...</p>
                                 </div>
                             </div>
-                            <span class="store-price">$0</span>
+                            <span class="store-price">R$ 0</span>
                         </li>
                     </ul>
                 </div>

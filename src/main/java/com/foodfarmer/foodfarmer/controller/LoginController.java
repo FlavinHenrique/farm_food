@@ -39,7 +39,7 @@ public class LoginController {
                         Model model) {
         Optional<Usuario> userOpt = usuarioService.findByEmail(email);
         
-        // Em um sistema real, use BCryptPasswordEncoder para comparar senhas
+        
         if (userOpt.isPresent() && userOpt.get().getSenha().equals(password)) {
             autenticacaoService.login(userOpt.get());
             if (redirect != null && !redirect.isEmpty()) {

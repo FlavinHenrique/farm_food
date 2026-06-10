@@ -24,7 +24,7 @@ public class LojaService {
 
     public Loja salvarLoja(Loja loja) {
         if (loja == null) {
-            throw new IllegalArgumentException("Loja não pode ser nula");
+            throw new IllegalArgumentException("Loja nÃ£o pode ser nula");      
         }
         return lojaRepository.save(loja);
     }
