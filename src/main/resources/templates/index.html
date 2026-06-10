@@ -22,12 +22,13 @@
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item"><a class="nav-link" th:href="@{/}">Home</a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/produtos}">Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Páginas</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/produtores}">Produtores</a></li>
                     <li class="nav-item"><a class="nav-link" href="#footer-info">Sobre</a></li>
                     <li class="nav-item"><a class="nav-link" href="#footer-info">Contato</a></li>
                 </ul>
                 <div class="d-flex align-items-center gap-3">
                     <a href="/" class="text-dark"><i class="bi bi-search"></i></a>
+                    <a th:if="${isLoggedIn}" th:href="@{/customer/messages}" class="text-dark"><i class="bi bi-chat-dots"></i></a>
                     <a th:if="${isLoggedIn}" th:href="@{/customer/profile}" class="text-dark"><i class="bi bi-person"></i></a>
                     <a th:if="${!isLoggedIn}" th:href="@{/login}" class="btn btn-primary-custom btn-sm">Entrar</a>
                     <a th:if="${isProducer}" th:href="@{/producer/dashboard}" class="text-dark"><i class="bi bi-shop"></i></a>
@@ -69,8 +70,8 @@
                     <h1>Fresquinho, saudável e na sua porta</h1>
                     <p class="my-4">Direto do produtor para você. No dia a dia, priorize a qualidade de vida e a saúde da sua família.</p>
                     <div class="d-flex gap-3">
-                        <button class="btn btn-primary-custom">Saiba mais</button>
-                        <button class="btn btn-outline-custom">Fazer pedido</button>
+                        <a href="#footer-info" class="btn btn-primary-custom">Saiba mais</a>
+                        <a th:href="@{/produtos}" class="btn btn-outline-custom">Fazer pedido</a>
                     </div>
                 </div>
                 <div class="col-lg-6 hero-image-container text-center mt-5 mt-lg-0">
@@ -114,7 +115,10 @@
                 <a th:href="@{'/produto/' + ${product.id}}" class="text-decoration-none text-dark">
                     <div class="card h-100 product-card">
                         <span class="discount-badge" th:text="${product.percentualDesconto} + '% OFF'">10% OFF</span>
-                        <img th:src="${product.urlImagem}" class="card-img-top" th:alt="${product.nome}">
+                        <img th:src="${product.urlImagem != null && !product.urlImagem.empty ? product.urlImagem : 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=600'}" 
+                             class="card-img-top" 
+                             th:alt="${product.nome}"
+                             onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=600'">
                         <div class="card-body">
                             <p class="text-muted small mb-1" th:text="${product.loja.nome}">Nome da Loja</p>
                             <h5 class="card-title fw-bold" th:text="${product.nome}">Cebola</h5>
@@ -138,7 +142,7 @@
             </div>
         </div>
         <div class="text-center mt-5">
-            <a href="#" class="text-success fw-bold text-decoration-none">Ver todos produtores <i class="bi bi-arrow-right-circle"></i></a>
+            <a th:href="@{/produtores}" class="text-success fw-bold text-decoration-none">Ver todos produtores <i class="bi bi-arrow-right-circle"></i></a>
         </div>
     </section>
 
@@ -153,12 +157,12 @@
                    th:classappend="${selectedCategoryId == null and selectedCategory == null} ? 'active'">Todos</a>
                 
                 <a th:each="cat : ${categories}" 
-                   th:href="@{/(categoriaId=${cat.id}) + '#products-section'}" 
+                   th:href="@{/(categoriaId=${cat.id})#products-section}" 
                    th:text="${cat.nome}"
                    class="btn-filter"
                    th:classappend="${selectedCategoryId == cat.id} ? 'active'">Categoria</a>
                 
-                <a th:href="@{/(emOferta=true) + '#products-section'}" 
+                <a th:href="@{/(emOferta=true)#products-section}" 
                    class="btn-filter"
                    th:classappend="${selectedCategory == 'oferta'} ? 'active'">Ofertas</a>
             </div>

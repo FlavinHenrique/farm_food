@@ -3,62 +3,272 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastrar Loja - Food Farmer</title>
+    <title th:text="${store.id != null ? 'Editar Loja - Farm Food' : 'Nova Loja - Farm Food'}">Cadastrar Loja - Farm Food</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
-        .form-container {
-            max-width: 600px;
-            margin: 4rem auto;
-            background: white;
-            padding: 3rem;
-            border-radius: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        body {
+            background-color: #f0f4f0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 2rem 0;
         }
-        .form-control {
-            border-radius: 10px;
-            padding: 0.8rem 1.2rem;
-            border: 1px solid #eee;
+        .main-card {
+            background: white;
+            border-radius: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+            overflow: hidden;
+            border: none;
+        }
+        .form-side {
+            padding: 4rem;
+        }
+        .preview-side {
+            background-color: #2d5a27;
+            padding: 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+        }
+        .step-badge {
+            background: #e8f5e9;
+            color: #2d5a27;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+        .form-title {
+            font-weight: 800;
+            font-size: 2.2rem;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
+        }
+        .form-subtitle {
+            color: #888;
+            margin-bottom: 3rem;
+        }
+        .form-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #444;
+            margin-bottom: 0.8rem;
+        }
+        .custom-input {
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            border: 2px solid #f0f0f0;
+            background-color: #fcfcfc;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        .custom-input:focus {
+            background-color: white;
+            border-color: #2d5a27;
+            box-shadow: 0 10px 20px rgba(45, 90, 39, 0.05);
+            outline: none;
+        }
+        /* Loja Preview Card */
+        .preview-card {
+            background: white;
+            border-radius: 30px;
+            width: 100%;
+            max-width: 320px;
+            overflow: hidden;
+            box-shadow: 0 30px 50px rgba(0,0,0,0.2);
+            transform: rotate(-2deg);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .preview-card:hover {
+            transform: rotate(0deg) scale(1.05);
+        }
+        .preview-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background-color: #eee;
+        }
+        .preview-content {
+            padding: 1.5rem;
+            text-align: left;
+            color: #1a1a1a;
+        }
+        .preview-name {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            min-height: 1.5em;
+        }
+        .preview-desc {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 3em;
+        }
+        .btn-save {
+            background-color: #2d5a27;
+            color: white;
+            border: none;
+            padding: 1.2rem;
+            border-radius: 18px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-top: 1rem;
+            transition: all 0.3s;
+        }
+        .btn-save:hover {
+            background-color: #23471e;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(45, 90, 39, 0.2);
+            color: white;
+        }
+        .btn-cancel {
+            color: #888;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        .btn-cancel:hover {
+            color: #d32f2f;
+        }
+        
+        @media (max-width: 991px) {
+            .preview-side { display: none; }
+            .form-side { padding: 2.5rem; }
         }
     </style>
 </head>
-<body class="bg-light">
+<body>
 
     <div class="container">
-        <div class="form-container">
-            <div class="text-center mb-5">
-                <div class="btn btn-primary-custom rounded-circle mb-3" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
-                    <i class="bi bi-shop fs-3"></i>
-                </div>
-                <h2 class="fw-bold" th:text="${store.id != null ? 'Editar Loja' : 'Sua Nova Loja'}">Sua Nova Loja</h2>
-                <p class="text-muted" th:text="${store.id != null ? 'Atualize os dados da sua vitrine' : 'Preencha os detalhes da sua vitrine virtual'}">Preencha os detalhes da sua vitrine virtual</p>
-            </div>
+        <div class="row justify-content-center">
+            <div class="col-xl-10">
+                <div class="main-card card">
+                    <div class="row g-0">
+                        <!-- Form Side -->
+                        <div class="col-lg-7 form-side">
+                            <span class="step-badge" th:text="${store.id != null ? 'Edição' : 'Passo 1 de 1'}">Passo 1 de 1</span>
+                            <h1 class="form-title" th:text="${store.id != null ? 'Atualize sua Loja' : 'Crie sua Vitrine'}">Crie sua Vitrine</h1>
+                            <p class="form-subtitle">Personalize como os clientes verão seu negócio.</p>
 
-            <form th:action="@{/producer/store/save}" th:object="${store}" method="post">
-                <input type="hidden" th:field="*{id}">
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Nome da Loja</label>
-                    <input type="text" th:field="*{nome}" class="form-control" placeholder="Ex: Horta Orgânica do João" required>
+                            <form th:action="@{/producer/store/save}" th:object="${store}" method="post">
+                                <input type="hidden" th:field="*{id}">
+                                
+                                <div class="mb-4">
+                                    <label class="form-label">Nome da Loja</label>
+                                    <input type="text" th:field="*{nome}" class="form-control custom-input" id="input-name" 
+                                           placeholder="Ex: Fazenda Sol Nascente" required autocomplete="off">
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label">O que você vende? (Descrição)</label>
+                                    <textarea th:field="*{descricao}" class="form-control custom-input" id="input-desc" 
+                                              placeholder="Ex: Frutas orgânicas e legumes colhidos toda manhã..." 
+                                              rows="3" required></textarea>
+                                </div>
+
+                                <div class="mb-5">
+                                    <label class="form-label">Link da Imagem da Capa</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-transparent border-end-0 custom-input pe-0"><i class="bi bi-link-45deg"></i></span>
+                                        <input type="url" th:field="*{urlImagem}" class="form-control custom-input border-start-0" id="input-img" 
+                                               placeholder="https://images.unsplash.com/..." required>
+                                    </div>
+                                    <small class="text-muted mt-2 d-block ms-1">Use links do Unsplash, Pexels ou Imgur para melhores resultados.</small>
+                                </div>
+
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <a th:href="@{/producer/stores}" class="btn-cancel">Cancelar alteração</a>
+                                    <button type="submit" class="btn btn-save px-5">
+                                        <span th:text="${store.id != null ? 'Salvar Alterações' : 'Inaugurar Loja'}">Inaugurar Loja</span>
+                                        <i class="bi bi-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Preview Side -->
+                        <div class="col-lg-5 preview-side">
+                            <div class="mb-5">
+                                <h3 class="fw-bold mb-2">Visualização em tempo real</h3>
+                                <p class="opacity-75 small">É assim que sua loja aparecerá no catálogo.</p>
+                            </div>
+
+                            <div class="preview-card">
+                                <img src="https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?auto=format&fit=crop&q=80&w=400" 
+                                     id="preview-img-display" class="preview-img" alt="Capa da Loja">
+                                <div class="preview-content">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h4 class="preview-name" id="preview-name-display">Nome da sua Loja</h4>
+                                        <span class="text-warning small"><i class="bi bi-star-fill"></i> 5.0</span>
+                                    </div>
+                                    <p class="preview-desc" id="preview-desc-display">Sua descrição aparecerá aqui para os clientes interessados nos seus produtos.</p>
+                                    <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-success-subtle text-success rounded-pill">Aberta agora</span>
+                                        <i class="bi bi-arrow-right-circle fs-4 text-success"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-5 text-white-50 small">
+                                <i class="bi bi-info-circle me-1"></i> 
+                                Dica: Imagens horizontais ficam melhores no card.
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Descrição Curta</label>
-                    <input type="text" th:field="*{descricao}" class="form-control" placeholder="Ex: Produtos frescos colhidos no dia" required>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label fw-bold">URL da Imagem da Loja</label>
-                    <input type="url" th:field="*{urlImagem}" class="form-control" placeholder="https://exemplo.com/imagem.jpg" required>
-                    <small class="text-muted">Dica: Use uma foto bonita da sua horta ou logo.</small>
-                </div>
-                
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary-custom">Salvar e Continuar</button>
-                    <a th:href="@{/producer/stores}" class="btn btn-light rounded-pill">Cancelar</a>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 
+    <script>
+        const inputName = document.getElementById('input-name');
+        const inputDesc = document.getElementById('input-desc');
+        const inputImg = document.getElementById('input-img');
+
+        const displayName = document.getElementById('preview-name-display');
+        const displayDesc = document.getElementById('preview-desc-display');
+        const displayImg = document.getElementById('preview-img-display');
+
+        // Initial values for Edit mode
+        if(inputName.value) displayName.innerText = inputName.value;
+        if(inputDesc.value) displayDesc.innerText = inputDesc.value;
+        if(inputImg.value) displayImg.src = inputImg.value;
+
+        // Real-time mirroring
+        inputName.addEventListener('input', (e) => {
+            displayName.innerText = e.target.value || 'Nome da sua Loja';
+        });
+
+        inputDesc.addEventListener('input', (e) => {
+            displayDesc.innerText = e.target.value || 'Sua descrição aparecerá aqui para os clientes interessados nos seus produtos.';
+        });
+
+        inputImg.addEventListener('input', (e) => {
+            if(e.target.value.startsWith('http')) {
+                displayImg.src = e.target.value;
+            }
+        });
+
+        // Error handling for broken images
+        displayImg.onerror = function() {
+            this.src = 'https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?auto=format&fit=crop&q=80&w=400';
+        };
+    </script>
 </body>
 </html>

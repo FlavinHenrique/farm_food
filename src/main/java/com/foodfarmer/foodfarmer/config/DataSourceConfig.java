@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
@@ -15,34 +16,41 @@ import com.zaxxer.hikari.HikariDataSource;
 @Configuration
 public class DataSourceConfig {
 
+    @Value("${spring.datasource.url:}")
+    private String springUrl;
+
+    @Value("${spring.datasource.username:}")
+    private String springUsername;
+
+    @Value("${spring.datasource.password:}")
+    private String springPassword;
+
     @Bean
     DataSource dataSource() {
         String rawUrl = firstNonBlank(
             System.getenv("SPRING_DATASOURCE_URL"),
             System.getenv("JDBC_DATABASE_URL"),
-            System.getenv("DATABASE_URL")
+            System.getenv("DATABASE_URL"),
+            springUrl
         );
 
         String jdbcUrl = toJdbcUrl(rawUrl);
         String username = firstNonBlank(
             System.getenv("SPRING_DATASOURCE_USERNAME"),
             System.getenv("DATABASE_USERNAME"),
+            springUsername,
             extractUsername(rawUrl)
         );
         String password = firstNonBlank(
             System.getenv("SPRING_DATASOURCE_PASSWORD"),
             System.getenv("DATABASE_PASSWORD"),
+            springPassword,
             extractPassword(rawUrl)
         );
 
         if (!StringUtils.hasText(jdbcUrl)) {
-            // Se não houver URL de ambiente, tenta usar o padrão do Spring (H2 local)
-            HikariConfig config = new HikariConfig();
-            config.setJdbcUrl("jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1");
-            config.setUsername("sa");
-            config.setPassword("");
-            config.setDriverClassName("org.h2.Driver");
-            return new HikariDataSource(config);
+            // Se não houver URL configurada, a aplicação deve falhar ao tentar usar o PostgreSQL
+            throw new IllegalStateException("Nenhuma URL de banco de dados configurada em variáveis de ambiente ou application.properties");
         }
 
         HikariConfig config = new HikariConfig();

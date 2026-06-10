@@ -24,24 +24,32 @@ public class LoginController {
     }
 
     @GetMapping("/login")
-    public String showLoginForm(Model model) {
+    public String showLoginForm(@RequestParam(required = false) String redirect, Model model) {
         if (autenticacaoService.estaLogado()) {
-            return "redirect:/customer/profile";
+            return "redirect:" + (redirect != null ? redirect : "/");
         }
+        model.addAttribute("redirect", redirect);
         return "login";
     }
 
     @PostMapping("/login")
-    public String login(@RequestParam String email, @RequestParam String password, Model model) {
+    public String login(@RequestParam String email, 
+                        @RequestParam String password, 
+                        @RequestParam(required = false) String redirect,
+                        Model model) {
         Optional<Usuario> userOpt = usuarioService.findByEmail(email);
         
-        // Em um sistema real, use BCryptPasswordEncoder para comparar senhas
+        
         if (userOpt.isPresent() && userOpt.get().getSenha().equals(password)) {
             autenticacaoService.login(userOpt.get());
-            return "redirect:/customer/profile";
+            if (redirect != null && !redirect.isEmpty()) {
+                return "redirect:" + redirect;
+            }
+            return "redirect:/";
         }
         
         model.addAttribute("error", "E-mail ou senha inválidos");
+        model.addAttribute("redirect", redirect);
         return "login";
     }
 

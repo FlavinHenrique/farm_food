@@ -54,6 +54,20 @@ public class ProdutoService {
         return produtoRepository.findById(id);
     }
 
+    public List<Produto> getProdutosMesmoNome(String nome) {
+        if (nome == null) {
+            return List.of();
+        }
+        return produtoRepository.findByNome(nome);
+    }
+
+    public List<Produto> getProdutosPorLoja(Long lojaId) {
+        if (lojaId == null) {
+            return List.of();
+        }
+        return produtoRepository.findByLojaId(lojaId);
+    }
+
     public void excluirProduto(Long id) {
         if (id != null) {
             produtoRepository.deleteById(id);

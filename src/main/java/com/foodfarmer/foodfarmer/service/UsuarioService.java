@@ -20,6 +20,10 @@ public class UsuarioService {
         return usuarioRepository.findByEmail(email);
     }
 
+    public Optional<Usuario> findById(Long id) {
+        return usuarioRepository.findById(id);
+    }
+
     public Usuario registrarCliente(Usuario usuario) {
         // Em um sistema real, criptografe a senha antes de salvar:
         // usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));

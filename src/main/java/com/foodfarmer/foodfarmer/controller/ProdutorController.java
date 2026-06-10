@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.foodfarmer.foodfarmer.model.Categoria;
 import com.foodfarmer.foodfarmer.model.Loja;
+import com.foodfarmer.foodfarmer.model.Pedido;
 import com.foodfarmer.foodfarmer.model.Produto;
 import com.foodfarmer.foodfarmer.model.Usuario;
 import com.foodfarmer.foodfarmer.service.AutenticacaoService;
 import com.foodfarmer.foodfarmer.service.LojaService;
+import com.foodfarmer.foodfarmer.service.PedidoService;
 import com.foodfarmer.foodfarmer.service.ProdutoService;
 
 @Controller
@@ -24,24 +26,45 @@ public class ProdutorController {
     private final LojaService lojaService;
     private final ProdutoService produtoService;
     private final AutenticacaoService autenticacaoService;
+    private final PedidoService pedidoService;
 
-    public ProdutorController(LojaService lojaService, ProdutoService produtoService, AutenticacaoService autenticacaoService) {
+    public ProdutorController(LojaService lojaService, ProdutoService produtoService, 
+                            AutenticacaoService autenticacaoService, PedidoService pedidoService) {
         this.lojaService = lojaService;
         this.produtoService = produtoService;
         this.autenticacaoService = autenticacaoService;
+        this.pedidoService = pedidoService;
     }
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         if (!autenticacaoService.estaLogado()) return "redirect:/login";
         Usuario produtor = autenticacaoService.getUsuarioAtual().get();
+        java.util.List<Loja> lojas = lojaService.getLojasPorDono(produtor);
+        java.util.List<Pedido> vendas = pedidoService.getPedidosPorLojas(lojas);
+        
         model.addAttribute("produtor", produtor);
-        model.addAttribute("stores", lojaService.getLojasPorDono(produtor));
+        model.addAttribute("stores", lojas);
+        model.addAttribute("vendas", vendas);
+        model.addAttribute("totalFaturamento", pedidoService.calcularFaturamentoTotal(vendas));
+        model.addAttribute("totalVendas", vendas.size());
         
         // Atributo para o modal de categoria
         model.addAttribute("newCategory", new Categoria());
         
         return "producer/dashboard";
+    }
+
+    @GetMapping("/vendas")
+    public String sales(Model model) {
+        if (!autenticacaoService.estaLogado()) return "redirect:/login";
+        Usuario produtor = autenticacaoService.getUsuarioAtual().get();
+        java.util.List<Loja> lojas = lojaService.getLojasPorDono(produtor);
+        java.util.List<Pedido> vendas = pedidoService.getPedidosPorLojas(lojas);
+        
+        model.addAttribute("produtor", produtor);
+        model.addAttribute("vendas", vendas);
+        return "producer/vendas";
     }
 
     @GetMapping("/stores")

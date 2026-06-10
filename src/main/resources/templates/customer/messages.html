@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Mensagens - Farm Food</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        body { background-color: #f8f9fa; }
+        .profile-container { margin-top: 50px; margin-bottom: 50px; }
+        .sidebar-card { background: white; border-radius: 20px; padding: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .nav-link-profile { display: flex; align-items: center; gap: 1rem; padding: 1rem; border-radius: 15px; color: #666; text-decoration: none; transition: all 0.3s; font-weight: 500; margin-bottom: 0.5rem; }
+        .nav-link-profile:hover { background-color: #f0f4f0; color: var(--primary-color); }
+        .nav-link-profile.active { background-color: var(--primary-color); color: white; }
+        
+        .content-card {
+            background: white;
+            border-radius: 25px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            min-height: 600px;
+        }
+
+        .message-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .message-card {
+            padding: 1.5rem;
+            border-radius: 20px;
+            border: 1px solid #f0f0f0;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .message-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-color: var(--primary-color);
+        }
+
+        .message-card.received {
+            background-color: #fcfdfc;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .message-card.sent {
+            background-color: #fff;
+            border-left: 5px solid #eee;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .message-from {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        .message-date {
+            font-size: 0.75rem;
+            color: #aaa;
+        }
+
+        .message-body {
+            font-size: 0.95rem;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .store-tag {
+            font-size: 0.7rem;
+            background: #e9f5e9;
+            color: var(--primary-color);
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg bg-white border-bottom py-3">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-success" href="/">Farm Food</a>
+            <div class="d-flex align-items-center gap-3">
+                <a href="/" class="btn btn-outline-success btn-sm rounded-pill px-3">Voltar para a loja</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container profile-container">
+        <div class="row g-4">
+            <div class="col-lg-3">
+                <div class="sidebar-card">
+                    <h5 class="fw-bold mb-4">Minha Conta</h5>
+                    <nav>
+                        <a th:href="@{/customer/messages}" class="nav-link-profile active">
+                            <i class="bi bi-chat-dots"></i> Mensagens
+                        </a>
+                        <a th:href="@{/logout}" class="nav-link-profile text-danger">
+                            <i class="bi bi-box-arrow-right"></i> Sair
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+                <div class="content-card">
+                    <h4 class="fw-bold mb-4">Minhas Mensagens</h4>
+                    
+                    <div class="message-list">
+                        <!-- Recupera todas as mensagens do cliente (enviadas e recebidas) -->
+                        <div th:each="msg : ${mensagens}" 
+                             class="message-card" 
+                             th:classappend="${msg.remetente.id != usuario.id} ? 'received' : 'sent'">
+                            
+                            <div class="message-header">
+                                <div>
+                                    <span class="message-from" th:text="${msg.remetente.id == usuario.id} ? 'Você' : ${msg.remetente.nome}">Remetente</span>
+                                    <span th:if="${msg.loja != null}" class="store-tag ms-2" th:text="${msg.loja.nome}">Loja</span>
+                                </div>
+                                <span class="message-date" th:text="${#temporals.format(msg.dataEnvio, 'dd/MM/yyyy HH:mm')}">Data</span>
+                            </div>
+                            
+                            <div class="message-body" th:text="${msg.conteudo}">
+                                Conteúdo da mensagem...
+                            </div>
+                        </div>
+
+                        <div th:if="${#lists.isEmpty(mensagens)}" class="text-center py-5 text-muted">
+                            <i class="bi bi-chat-left-text fs-1 d-block mb-3 opacity-25"></i>
+                            <p>Você ainda não possui mensagens.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

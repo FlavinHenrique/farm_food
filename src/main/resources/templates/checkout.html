@@ -57,6 +57,9 @@
         
         .error-feedback { color: #dc3545; font-size: 0.875em; margin-top: 0.25rem; display: none; }
         .is-invalid ~ .error-feedback { display: block; }
+
+        .address-selection-card:hover { border-color: var(--primary-color) !important; background: var(--secondary-color) !important; }
+        .address-selection-card.selected { border-color: var(--primary-color) !important; background: var(--secondary-color) !important; box-shadow: 0 0 0 1px var(--primary-color); }
     </style>
 </head>
 <body>
@@ -103,12 +106,12 @@
                         <div class="row g-3">
                             <div class="col-md-12">
                                 <label class="form-label">Nome Completo *</label>
-                                <input type="text" class="form-control" id="nome" required>
+                                <input type="text" class="form-control" id="nome" th:value="${usuario.nome}" required>
                                 <div class="invalid-feedback">Por favor, insira seu nome completo.</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">E-mail *</label>
-                                <input type="email" class="form-control" id="email" required>
+                                <input type="email" class="form-control" id="email" th:value="${usuario.email}" required>
                                 <div class="invalid-feedback">Insira um e-mail válido.</div>
                             </div>
                             <div class="col-md-6">
@@ -130,40 +133,101 @@
                     <!-- Passo 2: Entrega -->
                     <div class="checkout-container d-none" id="step-2">
                         <h3 class="section-title"><i class="bi bi-geo-alt"></i> Endereço de Entrega</h3>
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label">CEP *</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="cep" placeholder="00000-000" required>
-                                    <button class="btn btn-outline-secondary" type="button" onclick="buscarCep()">Buscar</button>
+                        
+                        <!-- Seleção de Endereços Salvos -->
+                        <div th:if="${not #lists.isEmpty(addresses)}" class="mb-4" id="saved-addresses-section">
+                            <p class="text-muted small mb-3">Selecione um endereço salvo ou cadastre um novo:</p>
+                            <div class="row g-3">
+                                <div class="col-md-6" th:each="addr : ${addresses}">
+                                    <div class="card h-100 address-selection-card saved-address-card" 
+                                         th:data-id="${addr.id}"
+                                         th:data-cep="${addr.cep}"
+                                         th:data-rua="${addr.rua}"
+                                         th:data-numero="${addr.numero}"
+                                         th:data-complemento="${addr.complemento}"
+                                         th:data-bairro="${addr.bairro}"
+                                         th:data-cidade="${addr.cidade}"
+                                         th:data-estado="${addr.estado}"
+                                         style="cursor: pointer; border: 2px solid #eee; border-radius: 15px; transition: all 0.2s;">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="fw-bold mb-1" th:text="${addr.apelido}">Casa</h6>
+                                                    <p class="small text-muted mb-0" th:text="${addr.rua} + ', ' + ${addr.numero}"></p>
+                                                    <p class="small text-muted mb-0" th:text="${addr.bairro}"></p>
+                                                    <p class="small text-muted mb-0" th:text="${addr.cidade} + ' / ' + ${addr.estado}"></p>
+                                                </div>
+                                                <i class="bi bi-geo-alt-fill text-success fs-5"></i>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="error-feedback" id="cep-error">CEP não encontrado.</div>
+                                <div class="col-md-6">
+                                    <div class="card h-100 d-flex align-items-center justify-content-center" 
+                                         onclick="showNewAddressForm()"
+                                         id="btn-new-address"
+                                         style="cursor: pointer; border: 2px dashed #ccc; border-radius: 15px; min-height: 100px;">
+                                        <div class="text-center py-3">
+                                            <i class="bi bi-plus-circle fs-3 text-muted"></i>
+                                            <p class="small text-muted mb-0">Novo Endereço</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-8">
-                                <label class="form-label">Endereço *</label>
-                                <input type="text" class="form-control" id="logradouro" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Número *</label>
-                                <input type="text" class="form-control" id="numero" required>
-                            </div>
-                            <div class="col-md-8">
-                                <label class="form-label">Complemento</label>
-                                <input type="text" class="form-control" id="complemento" placeholder="Apto, Bloco, etc.">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Bairro *</label>
-                                <input type="text" class="form-control" id="bairro" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Cidade / UF *</label>
-                                <input type="text" class="form-control" id="cidade_uf" required readonly style="background-color: #f8f9fa;">
+                        </div>
+
+                        <!-- Formulário de Endereço -->
+                        <div id="address-form-container" th:classappend="${not #lists.isEmpty(addresses)} ? 'd-none' : ''">
+                            <div th:if="${not #lists.isEmpty(addresses)}" class="mb-4">
+                                <button type="button" class="btn btn-sm btn-link text-success p-0 text-decoration-none" onclick="hideNewAddressForm()">
+                                    <i class="bi bi-arrow-left"></i> Voltar para endereços salvos
+                                </button>
                             </div>
                             
-                            <div class="col-12 mt-4 d-flex justify-content-between">
-                                <button type="button" class="btn btn-outline-secondary" onclick="prevStep(2)">Voltar</button>
-                                <button type="button" class="btn btn-primary-custom" onclick="nextStep(2)">Continuar para Pagamento</button>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">CEP *</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="cep" placeholder="00000-000" required>
+                                        <button class="btn btn-outline-secondary" type="button" onclick="buscarCep()">Buscar</button>
+                                    </div>
+                                    <div class="error-feedback" id="cep-error">CEP não encontrado.</div>
+                                </div>
+                                <div class="col-md-8">
+                                    <label class="form-label">Endereço *</label>
+                                    <input type="text" class="form-control" id="logradouro" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Número *</label>
+                                    <input type="text" class="form-control" id="numero" required>
+                                </div>
+                                <div class="col-md-8">
+                                    <label class="form-label">Complemento</label>
+                                    <input type="text" class="form-control" id="complemento" placeholder="Apto, Bloco, etc.">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Bairro *</label>
+                                    <input type="text" class="form-control" id="bairro" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Cidade / UF *</label>
+                                    <input type="text" class="form-control" id="cidade_uf" required readonly style="background-color: #f8f9fa;">
+                                </div>
+                                
+                                <div class="col-12 mt-3" id="save-address-checkbox" th:if="${isLoggedIn}">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="save-new-address">
+                                        <label class="form-check-label text-muted small" for="save-new-address">
+                                            Salvar este endereço em meu perfil
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+
+                        <div class="col-12 mt-4 d-flex justify-content-between">
+                            <button type="button" class="btn btn-outline-secondary" onclick="prevStep(2)">Voltar</button>
+                            <button type="button" class="btn btn-primary-custom" onclick="nextStep(2)">Continuar para Pagamento</button>
                         </div>
                     </div>
 
@@ -301,38 +365,153 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let cart = JSON.parse(localStorage.getItem('farmfood_cart')) || [];
+        // Inicialização robusta do carrinho
+        let cart = [];
+        try {
+            const savedCart = localStorage.getItem('farmfood_cart');
+            if (savedCart) {
+                cart = JSON.parse(savedCart);
+                console.log('Carrinho carregado com sucesso:', cart);
+            } else {
+                console.warn('Nenhum carrinho encontrado no localStorage.');
+            }
+        } catch (e) {
+            console.error('Erro crítico ao ler o carrinho do localStorage:', e);
+            cart = [];
+        }
+
         let subtotal = 0;
-        let shipping = 15.90;
+        const shipping = 15.90; // Frete fixo
         let discount = 0;
         let total = 0;
 
         function formatCurrency(val) {
-            return 'R$ ' + val.toFixed(2).replace('.', ',');
+            try {
+                const num = parseFloat(val);
+                if (isNaN(num)) return 'R$ 0,00';
+                return 'R$ ' + num.toFixed(2).replace('.', ',');
+            } catch (e) {
+                return 'R$ 0,00';
+            }
         }
 
         function loadCheckout() {
-            if (cart.length === 0) {
-                window.location.href = '/cart';
+            console.log('Iniciando carregamento do checkout...');
+            const container = document.getElementById('checkout-items');
+            if (!container) {
+                console.error('ERRO: Elemento "checkout-items" não encontrado!');
                 return;
             }
 
-            const container = document.getElementById('checkout-items');
-            container.innerHTML = '';
-            subtotal = 0;
+            try {
+                if (!Array.isArray(cart) || cart.length === 0) {
+                    console.warn('Carrinho vazio ou não encontrado.');
+                    container.innerHTML = '<p class="text-muted text-center py-3">Seu carrinho está vazio.</p>';
+                    // Redireciona apenas se não for teste
+                    if (!window.location.href.includes('localhost') || window.location.pathname !== '/checkout') {
+                         // window.location.href = '/cart';
+                    }
+                    return;
+                }
+                
+                container.innerHTML = '';
+                subtotal = 0;
 
-            cart.forEach(item => {
-                const itemTotal = item.price * item.qty;
-                subtotal += itemTotal;
-                container.innerHTML += `
-                    <div class="summary-item">
-                        <span class="summary-item-name">${item.qty}x ${item.name}</span>
-                        <span class="fw-medium">${formatCurrency(itemTotal)}</span>
-                    </div>
-                `;
-            });
+                cart.forEach((item, index) => {
+                    console.log(`Processando item [${index}]:`, item);
+                    let price = 0;
+                    if (typeof item.price === 'string') {
+                        price = parseFloat(item.price.replace('R$', '').replace(/\s/g, '').replace(',', '.')) || 0;
+                    } else {
+                        price = parseFloat(item.price) || 0;
+                    }
+                    
+                    const qty = parseInt(item.qty) || 0;
+                    const itemTotal = price * qty;
+                    
+                    subtotal += itemTotal;
+                    container.innerHTML += `
+                        <div class="summary-item">
+                            <span class="summary-item-name">${qty}x ${item.name}</span>
+                            <span class="fw-medium">${formatCurrency(itemTotal)}</span>
+                        </div>
+                    `;
+                });
 
-            updateTotals();
+                console.log('Subtotal final:', subtotal);
+                updateTotals();
+            } catch (err) {
+                console.error('ERRO CRÍTICO no loadCheckout:', err);
+                container.innerHTML = '<p class="text-danger small">Erro ao carregar itens do pedido.</p>';
+            }
+        }
+
+        // Funções para Endereços Salvos
+        let selectedAddressId = null;
+
+        document.addEventListener('click', function(e) {
+            const card = e.target.closest('.saved-address-card');
+            if (card) {
+                // Remove seleção de outros cards
+                document.querySelectorAll('.address-selection-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+
+                selectedAddressId = card.dataset.id;
+
+                // Preenche os campos
+                const cep = card.dataset.cep || '';
+                const rua = card.dataset.rua || '';
+                const numero = card.dataset.numero || '';
+                const complemento = card.dataset.complemento || '';
+                const bairro = card.dataset.bairro || '';
+                const cidade = card.dataset.cidade || '';
+                const estado = card.dataset.estado || '';
+
+                const cepEl = document.getElementById('cep');
+                const logradouroEl = document.getElementById('logradouro');
+                const numeroEl = document.getElementById('numero');
+                const complementoEl = document.getElementById('complemento');
+                const bairroEl = document.getElementById('bairro');
+                const cidadeUfEl = document.getElementById('cidade_uf');
+
+                if (cepEl) cepEl.value = cep;
+                if (logradouroEl) logradouroEl.value = rua;
+                if (numeroEl) numeroEl.value = numero;
+                if (complementoEl) complementoEl.value = (complemento && complemento !== 'null') ? complemento : '';
+                if (bairroEl) bairroEl.value = bairro;
+                if (cidadeUfEl) cidadeUfEl.value = (cidade && estado) ? `${cidade} / ${estado}` : (cidade || estado || '');
+
+                // Esconde o formulário
+                const formContainer = document.getElementById('address-form-container');
+                const saveCheckbox = document.getElementById('save-address-checkbox');
+                if (formContainer) formContainer.classList.add('d-none');
+                if (saveCheckbox) saveCheckbox.classList.add('d-none');
+            }
+        });
+
+        function showNewAddressForm() {
+            selectedAddressId = null;
+            document.querySelectorAll('.address-selection-card').forEach(c => c.classList.remove('selected'));
+            
+            // Limpa os campos
+            document.getElementById('cep').value = '';
+            document.getElementById('logradouro').value = '';
+            document.getElementById('numero').value = '';
+            document.getElementById('complemento').value = '';
+            document.getElementById('bairro').value = '';
+            document.getElementById('cidade_uf').value = '';
+
+            document.getElementById('address-form-container').classList.remove('d-none');
+            document.getElementById('save-address-checkbox').classList.remove('d-none');
+            
+            // Scroll suave para o formulário
+            document.getElementById('address-form-container').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function hideNewAddressForm() {
+            document.getElementById('address-form-container').classList.add('d-none');
+            document.getElementById('save-address-checkbox').classList.add('d-none');
+            document.getElementById('saved-addresses-section').scrollIntoView({ behavior: 'smooth' });
         }
 
         function buscarCep() {
@@ -376,29 +555,43 @@
         }
 
         function updateTotals() {
-            const isPix = document.getElementById('pay-pix').checked;
-            
-            // Simula desconto de 5% no PIX
-            if (isPix) {
-                discount = subtotal * 0.05;
-                document.getElementById('check-discount-row').classList.remove('d-none');
-            } else {
-                discount = 0;
-                document.getElementById('check-discount-row').classList.add('d-none');
-            }
+            console.log('Atualizando totais...');
+            try {
+                const subtotalEl = document.getElementById('check-subtotal');
+                const discountEl = document.getElementById('check-discount');
+                const totalEl = document.getElementById('check-total');
+                const shippingEl = document.getElementById('check-shipping');
+                const discountRow = document.getElementById('check-discount-row');
 
-            total = subtotal + shipping - discount;
-
-            document.getElementById('check-subtotal').innerText = formatCurrency(subtotal);
-            document.getElementById('check-discount').innerText = '- ' + formatCurrency(discount);
-            document.getElementById('check-total').innerText = formatCurrency(total);
-            
-            // Atualiza parcelas
-            const parcelasSelect = document.getElementById('cc-parcelas');
-            if(parcelasSelect) {
-                for(let i=1; i<=3; i++) {
-                    parcelasSelect.options[i-1].text = `${i}x de ${formatCurrency(total/i)} sem juros`;
+                const payPix = document.getElementById('pay-pix');
+                const isPix = payPix ? payPix.checked : false;
+                
+                if (isPix) {
+                    discount = subtotal * 0.05;
+                    if (discountRow) discountRow.classList.remove('d-none');
+                } else {
+                    discount = 0;
+                    if (discountRow) discountRow.classList.add('d-none');
                 }
+
+                total = subtotal + shipping - discount;
+                if (total < 0) total = 0;
+
+                if (subtotalEl) subtotalEl.innerText = formatCurrency(subtotal);
+                if (discountEl) discountEl.innerText = '- ' + formatCurrency(discount);
+                if (shippingEl) shippingEl.innerText = formatCurrency(shipping);
+                if (totalEl) totalEl.innerText = formatCurrency(total);
+                
+                // Atualiza parcelas
+                const parcelasSelect = document.getElementById('cc-parcelas');
+                if (parcelasSelect && parcelasSelect.options && parcelasSelect.options.length > 0) {
+                    const maxParcelas = Math.min(parcelasSelect.options.length, 3);
+                    for (let i = 1; i <= maxParcelas; i++) {
+                        parcelasSelect.options[i-1].text = `${i}x de ${formatCurrency(total/i)} sem juros`;
+                    }
+                }
+            } catch (err) {
+                console.error('ERRO ao atualizar totais:', err);
             }
         }
 
@@ -414,30 +607,45 @@
 
         // Navegação de passos
         function nextStep(current) {
-            // Validação simples (em prod usaria verificação de validade de forms reais)
-            const form = document.getElementById('checkout-form');
-            const inputs = document.getElementById(`step-${current}`).querySelectorAll('[required]');
-            let isValid = true;
-            
-            inputs.forEach(input => {
-                if(!input.value.trim()) {
-                    input.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    input.classList.remove('is-invalid');
-                }
-            });
-            
-            if(!isValid) return;
+            try {
+                const stepContainer = document.getElementById(`step-${current}`);
+                if (!stepContainer) return;
 
-            document.getElementById(`step-${current}`).classList.add('d-none');
-            document.getElementById(`step-${current+1}`).classList.remove('d-none');
-            
-            document.getElementById(`step-indicator-${current}`).classList.remove('active');
-            document.getElementById(`step-indicator-${current}`).classList.add('completed');
-            document.getElementById(`step-indicator-${current+1}`).classList.add('active');
-            
-            window.scrollTo(0,0);
+                const inputs = stepContainer.querySelectorAll('[required]');
+                let isValid = true;
+                
+                inputs.forEach(input => {
+                    if(!input.value || !input.value.trim()) {
+                        input.classList.add('is-invalid');
+                        isValid = false;
+                    } else {
+                        input.classList.remove('is-invalid');
+                    }
+                });
+                
+                if(!isValid) return;
+
+                const nextStepContainer = document.getElementById(`step-${current+1}`);
+                if (!nextStepContainer) return;
+
+                stepContainer.classList.add('d-none');
+                nextStepContainer.classList.remove('d-none');
+                
+                const currentIndicator = document.getElementById(`step-indicator-${current}`);
+                const nextIndicator = document.getElementById(`step-indicator-${current+1}`);
+                
+                if (currentIndicator) {
+                    currentIndicator.classList.remove('active');
+                    currentIndicator.classList.add('completed');
+                }
+                if (nextIndicator) {
+                    nextIndicator.classList.add('active');
+                }
+                
+                window.scrollTo(0,0);
+            } catch (err) {
+                console.error('Erro ao navegar para o próximo passo:', err);
+            }
         }
 
         function prevStep(current) {
@@ -449,26 +657,17 @@
             document.getElementById(`step-indicator-${current-1}`).classList.remove('completed');
         }
 
-
-        // Máscaras simples
-        document.getElementById('cpf').addEventListener('input', function(e) {
-            var x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,3})(\d{0,2})/);
-            e.target.value = !x[2] ? x[1] : x[1] + '.' + x[2] + (x[3] ? '.' + x[3] : '') + (x[4] ? '-' + x[4] : '');
-        });
-        
-        document.getElementById('telefone').addEventListener('input', function(e) {
-            var x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
-            e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
-        });
-
         // Submit Final
         function submitOrder() {
             const btn = document.getElementById('btn-submit-order');
+            if (!btn) return;
             
             // Validação Cartão se selecionado
-            if(document.getElementById('pay-card').checked) {
-                if(!document.getElementById('cc-numero').value) {
-                    document.getElementById('cc-numero').classList.add('is-invalid');
+            const payCard = document.getElementById('pay-card');
+            if(payCard && payCard.checked) {
+                const ccNum = document.getElementById('cc-numero');
+                if(ccNum && !ccNum.value) {
+                    ccNum.classList.add('is-invalid');
                     return;
                 }
             }
@@ -477,9 +676,13 @@
             btn.disabled = true;
 
             setTimeout(() => {
-                const modal = new bootstrap.Modal(document.getElementById('successModal'));
-                document.getElementById('order-number').innerText = Math.floor(Math.random() * 90000) + 10000;
-                modal.show();
+                const modalEl = document.getElementById('successModal');
+                if (modalEl) {
+                    const modal = new bootstrap.Modal(modalEl);
+                    const orderNumEl = document.getElementById('order-number');
+                    if (orderNumEl) orderNumEl.innerText = Math.floor(Math.random() * 90000) + 10000;
+                    modal.show();
+                }
             }, 1500);
         }
 
@@ -487,8 +690,30 @@
             localStorage.removeItem('farmfood_cart');
         }
 
-        // Inicia a página
-        loadCheckout();
+        // Inicialização quando o DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM carregado, inicializando checkout...');
+            
+            // Máscaras simples com verificação de existência
+            const cpfEl = document.getElementById('cpf');
+            if (cpfEl) {
+                cpfEl.addEventListener('input', function(e) {
+                    var x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,3})(\d{0,2})/);
+                    e.target.value = !x[2] ? x[1] : x[1] + '.' + x[2] + (x[3] ? '.' + x[3] : '') + (x[4] ? '-' + x[4] : '');
+                });
+            }
+            
+            const telEl = document.getElementById('telefone');
+            if (telEl) {
+                telEl.addEventListener('input', function(e) {
+                    var x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+                    e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+                });
+            }
+
+            // Inicia a página
+            loadCheckout();
+        });
     </script>
 </body>
 </html>

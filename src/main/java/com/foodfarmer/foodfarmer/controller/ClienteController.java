@@ -15,6 +15,7 @@ import com.foodfarmer.foodfarmer.model.MetodoPagamento;
 import com.foodfarmer.foodfarmer.model.Usuario;
 import com.foodfarmer.foodfarmer.service.AutenticacaoService;
 import com.foodfarmer.foodfarmer.service.ClienteService;
+import com.foodfarmer.foodfarmer.service.PedidoService;
 import com.foodfarmer.foodfarmer.service.UsuarioService;
 
 @Controller
@@ -24,11 +25,25 @@ public class ClienteController {
     private final ClienteService clienteService;
     private final AutenticacaoService autenticacaoService;
     private final UsuarioService usuarioService;
+    private final PedidoService pedidoService;
 
-    public ClienteController(ClienteService clienteService, AutenticacaoService autenticacaoService, UsuarioService usuarioService) {
+    public ClienteController(ClienteService clienteService, AutenticacaoService autenticacaoService, 
+                           UsuarioService usuarioService, PedidoService pedidoService) {
         this.clienteService = clienteService;
         this.autenticacaoService = autenticacaoService;
         this.usuarioService = usuarioService;
+        this.pedidoService = pedidoService;
+    }
+
+    @GetMapping("/orders")
+    public String orders(Model model) {
+        if (!autenticacaoService.estaLogado()) {
+            return "redirect:/login";
+        }
+        Usuario customer = autenticacaoService.getUsuarioAtual().get();
+        model.addAttribute("usuario", customer);
+        model.addAttribute("orders", pedidoService.getPedidosPorCliente(customer));
+        return "customer/orders";
     }
 
     @GetMapping("/profile")
