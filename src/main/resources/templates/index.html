@@ -28,6 +28,7 @@
                 </ul>
                 <div class="d-flex align-items-center gap-3">
                     <a href="/" class="text-dark"><i class="bi bi-search"></i></a>
+                    <a th:if="${isLoggedIn}" th:href="@{/customer/messages}" class="text-dark"><i class="bi bi-chat-dots"></i></a>
                     <a th:if="${isLoggedIn}" th:href="@{/customer/profile}" class="text-dark"><i class="bi bi-person"></i></a>
                     <a th:if="${!isLoggedIn}" th:href="@{/login}" class="btn btn-primary-custom btn-sm">Entrar</a>
                     <a th:if="${isProducer}" th:href="@{/producer/dashboard}" class="text-dark"><i class="bi bi-shop"></i></a>
@@ -69,8 +70,8 @@
                     <h1>Fresquinho, saudável e na sua porta</h1>
                     <p class="my-4">Direto do produtor para você. No dia a dia, priorize a qualidade de vida e a saúde da sua família.</p>
                     <div class="d-flex gap-3">
-                        <button class="btn btn-primary-custom">Saiba mais</button>
-                        <button class="btn btn-outline-custom">Fazer pedido</button>
+                        <a href="#footer-info" class="btn btn-primary-custom">Saiba mais</a>
+                        <a th:href="@{/produtos}" class="btn btn-outline-custom">Fazer pedido</a>
                     </div>
                 </div>
                 <div class="col-lg-6 hero-image-container text-center mt-5 mt-lg-0">

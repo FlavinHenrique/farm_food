@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mensagens - Farm Food</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-green: #2d5a27;
+            --active-bg: #ffffff;
+            --active-text: #2d5a27;
+            --sidebar-text: #ffffff;
+            --sidebar-text-muted: rgba(255, 255, 255, 0.7);
+            --body-bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--body-bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        .wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background-color: var(--sidebar-green);
+            color: var(--sidebar-text);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .sidebar-brand {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 3rem;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.2rem;
+            color: var(--sidebar-text-muted) !important;
+            text-decoration: none;
+            border-radius: 30px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-link i {
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white !important;
+        }
+
+        .nav-link.active {
+            background-color: var(--active-bg);
+            color: var(--active-text) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 2rem;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            margin-left: 280px;
+            padding: 2.5rem 3.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-wrapper {
+            display: flex;
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+            flex-grow: 1;
+            overflow: hidden;
+            height: calc(100vh - 150px);
+        }
+
+        .contacts-list {
+            width: 350px;
+            border-right: 1px solid #f0f0f0;
+            overflow-y: auto;
+        }
+
+        .contact-item {
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid #f8f9fa;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+        }
+
+        .contact-item:hover {
+            background-color: #f9faf9;
+        }
+
+        .contact-item.active {
+            background-color: #f1f8f1;
+            border-left: 4px solid var(--sidebar-green);
+        }
+
+        .contact-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            display: block;
+            margin-bottom: 0.2rem;
+        }
+
+        .contact-last-msg {
+            font-size: 0.8rem;
+            color: #888;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+
+        .chat-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+        }
+
+        .chat-header {
+            padding: 1.2rem 2rem;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            background-color: #fcfdfc;
+        }
+
+        .msg-bubble {
+            max-width: 70%;
+            padding: 0.8rem 1.2rem;
+            border-radius: 18px;
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .msg-received {
+            align-self: flex-start;
+            background-color: #f0f0f0;
+            color: #333;
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg-sent {
+            align-self: flex-end;
+            background-color: var(--sidebar-green);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-time {
+            font-size: 0.7rem;
+            margin-top: 0.3rem;
+            opacity: 0.7;
+            display: block;
+            text-align: right;
+        }
+
+        .chat-input-area {
+            padding: 1.5rem 2rem;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .chat-form {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .chat-input {
+            flex-grow: 1;
+            border: 1px solid #e0e0e0;
+            border-radius: 25px;
+            padding: 0.8rem 1.5rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: var(--sidebar-green);
+        }
+
+        .btn-send {
+            background-color: var(--sidebar-green);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .btn-send:hover {
+            transform: scale(1.05);
+            background-color: #21421c;
+        }
+
+        .empty-chat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #ccc;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <a href="/" class="sidebar-brand">FarmFood</a>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a th:href="@{/producer/dashboard}" class="nav-link">
+                        <i class="bi bi-grid-fill"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a th:href="@{/producer/stores}" class="nav-link">
+                        <i class="bi bi-shop"></i> Minhas lojas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a th:href="@{/producer/products}" class="nav-link">
+                        <i class="bi bi-box-seam-fill"></i> Produtos
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-bar-chart-line-fill"></i> Vendas
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a th:href="@{/producer/messages}" class="nav-link active">
+                            <i class="bi bi-chat-dots-fill"></i> Mensagens
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="bi bi-gear-fill"></i> Configurações
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a th:href="@{/logout}" class="nav-link">
+                            <i class="bi bi-box-arrow-right"></i> Sair
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header class="top-header mb-4">
+                <h1 class="page-title fs-3 fw-bold">Mensagens</h1>
+            </header>
+
+            <div class="chat-wrapper">
+                <!-- Contatos -->
+                <div class="contacts-list">
+                    <div class="p-3 border-bottom bg-light">
+                        <h6 class="mb-0 fw-bold">Conversas Recentes</h6>
+                    </div>
+                    
+                    <!-- Lista de contatos únicos -->
+                    <div th:each="contato : ${contatos}">
+                        <a th:href="@{/producer/messages(contactId=${contato.id})}" 
+                           class="contact-item" 
+                           th:classappend="${contatoAtivo != null && contatoAtivo.id == contato.id} ? 'active'">
+                            <span class="contact-name" th:text="${contato.nome}">Nome do Cliente</span>
+                            <span class="contact-last-msg">Ver conversa</span>
+                        </a>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(contatos)}" class="p-5 text-center text-muted small">
+                        Nenhuma mensagem recebida.
+                    </div>
+                </div>
+
+                <!-- Área de Chat -->
+                <div class="chat-area">
+                    <div th:if="${contatoAtivo != null}" class="h-100 d-flex flex-direction-column" style="display: flex; flex-direction: column; flex-grow: 1;">
+                        <div class="chat-header">
+                            <div>
+                                <h6 class="mb-0 fw-bold" th:text="${contatoAtivo.nome}">Nome do Contato</h6>
+                                <span class="text-muted small">Online</span>
+                            </div>
+                        </div>
+
+                        <div class="chat-messages" id="chat-box">
+                            <div th:each="msg : ${conversa}" class="msg-bubble" 
+                                 th:classappend="${msg.remetente.id == produtor.id} ? 'msg-sent' : 'msg-received'">
+                                <span th:text="${msg.conteudo}">Conteúdo da mensagem</span>
+                                <span class="msg-time" th:text="${#temporals.format(msg.dataEnvio, 'HH:mm')}">14:30</span>
+                            </div>
+                        </div>
+
+                        <div class="chat-input-area">
+                            <form th:action="@{/messages/reply}" method="post" class="chat-form">
+                                <input type="hidden" name="destinatarioId" th:value="${contatoAtivo.id}">
+                                <input type="hidden" name="role" value="PRODUTOR">
+                                <input type="text" name="conteudo" class="chat-input" placeholder="Digite sua resposta..." required autocomplete="off">
+                                <button type="submit" class="btn-send">
+                                    <i class="bi bi-send-fill"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div th:if="${contatoAtivo == null}" class="empty-chat">
+                        <i class="bi bi-chat-left-dots fs-1 mb-3"></i>
+                        <h5 class="fw-bold">Selecione uma conversa</h5>
+                        <p class="small">Escolha um cliente na lista ao lado para responder.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-scroll para o final do chat
+        const chatBox = document.getElementById('chat-box');
+        if (chatBox) {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</body>
+</html>

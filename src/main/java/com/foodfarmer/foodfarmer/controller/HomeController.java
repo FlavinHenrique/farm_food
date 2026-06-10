@@ -6,11 +6,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.foodfarmer.foodfarmer.model.Loja;
 import com.foodfarmer.foodfarmer.model.PapelUsuario;
 import com.foodfarmer.foodfarmer.model.Produto;
 import com.foodfarmer.foodfarmer.model.Usuario;
 import com.foodfarmer.foodfarmer.service.AutenticacaoService;
 import com.foodfarmer.foodfarmer.service.ClienteService;
+import com.foodfarmer.foodfarmer.service.LojaService;
 import com.foodfarmer.foodfarmer.service.ProdutoService;
 
 @Controller
@@ -19,10 +21,14 @@ public class HomeController {
     private final AutenticacaoService autenticacaoService;
     private final ClienteService clienteService;
 
-    public HomeController(ProdutoService produtoService, AutenticacaoService autenticacaoService, ClienteService clienteService) {
+    private final LojaService lojaService;
+
+    public HomeController(ProdutoService produtoService, AutenticacaoService autenticacaoService, 
+                          ClienteService clienteService, LojaService lojaService) {
         this.produtoService = produtoService;
         this.autenticacaoService = autenticacaoService;
         this.clienteService = clienteService;
+        this.lojaService = lojaService;
     }
 
     @GetMapping("/")
@@ -92,6 +98,18 @@ public class HomeController {
         model.addAttribute("isLoggedIn", autenticacaoService.estaLogado());
         
         return "product-detail";
+    }
+
+    @GetMapping("/loja/{id}")
+    public String lojaDetalhe(@PathVariable Long id, Model model) {
+        Loja loja = lojaService.getLojaPorId(id)
+            .orElseThrow(() -> new IllegalArgumentException("Loja não encontrada: " + id));
+        
+        model.addAttribute("loja", loja);
+        model.addAttribute("products", produtoService.getProdutosPorLoja(id));
+        model.addAttribute("isLoggedIn", autenticacaoService.estaLogado());
+        
+        return "store-detail";
     }
 
     @GetMapping("/cart")

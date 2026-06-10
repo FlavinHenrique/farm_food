@@ -41,7 +41,7 @@ public class UsuarioController {
             }
             return "redirect:/?registered=true";
         } catch (Exception e) {
-            model.addAttribute("error", "Este e-mail já está cadastrado.");
+            model.addAttribute("error", "Este e-mail jÃ¡ estÃ¡ cadastrado.");
             model.addAttribute("redirect", redirect);
             return "register";
         }
@@ -60,7 +60,7 @@ public class UsuarioController {
             autenticacaoService.login(salvo);
             return "redirect:/producer/dashboard?registered=true";
         } catch (Exception e) {
-            model.addAttribute("error", "Este e-mail ou CNPJ já está cadastrado.");
+            model.addAttribute("error", "Este e-mail ou CNPJ jÃ¡ estÃ¡ cadastrado.");
             return "register-producer";
         }
     }
