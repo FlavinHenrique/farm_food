@@ -40,19 +40,33 @@ public class HomeController {
             autenticacaoService.getUsuarioAtual().get().getPapel() == PapelUsuario.PRODUTOR);
         
         model.addAttribute("categories", produtoService.getTodasCategorias());
-        model.addAttribute("saleProducts", produtoService.getProdutosEmPromocao());
+        
+        // Filtrar produtos em promoção que estejam incompletos
+        java.util.List<Produto> saleProducts = produtoService.getProdutosEmPromocao().stream()
+            .filter(p -> p.getNome() != null && p.getPreco() != null && p.getUnidade() != null)
+            .toList();
+        model.addAttribute("saleProducts", saleProducts);
+        
         model.addAttribute("stores", produtoService.getTodasLojas());
         
-        // Lógica de filtragem de produtos
+        // Lógica de filtragem de produtos (removendo produtos com dados incompletos/null)
+        java.util.List<Produto> products;
         if (Boolean.TRUE.equals(emOferta)) {
-            model.addAttribute("products", produtoService.getProdutosEmPromocao());
+            products = produtoService.getProdutosEmPromocao();
             model.addAttribute("selectedCategory", "oferta");
         } else if (categoriaId != null) {
-            model.addAttribute("products", produtoService.getProdutosPorCategoria(categoriaId));
+            products = produtoService.getProdutosPorCategoria(categoriaId);
             model.addAttribute("selectedCategoryId", categoriaId);
         } else {
-            model.addAttribute("products", produtoService.getTodosProdutos());
+            products = produtoService.getTodosProdutos();
         }
+
+        // Filtrar produtos que tenham campos essenciais nulos (nome, preço ou unidade)
+        java.util.List<Produto> validProducts = products.stream()
+            .filter(p -> p.getNome() != null && p.getPreco() != null && p.getUnidade() != null)
+            .toList();
+
+        model.addAttribute("products", validProducts);
         
         return "index";
     }
@@ -67,12 +81,20 @@ public class HomeController {
         
         model.addAttribute("categories", produtoService.getTodasCategorias());
         
+        java.util.List<Produto> products;
         if (categoriaId != null) {
-            model.addAttribute("products", produtoService.getProdutosPorCategoria(categoriaId));
+            products = produtoService.getProdutosPorCategoria(categoriaId);
             model.addAttribute("selectedCategoryId", categoriaId);
         } else {
-            model.addAttribute("products", produtoService.getTodosProdutos());
+            products = produtoService.getTodosProdutos();
         }
+
+        // Filtrar produtos incompletos
+        java.util.List<Produto> validProducts = products.stream()
+            .filter(p -> p.getNome() != null && p.getPreco() != null && p.getUnidade() != null)
+            .toList();
+        
+        model.addAttribute("products", validProducts);
         
         return "produtos";
     }
@@ -106,7 +128,13 @@ public class HomeController {
             .orElseThrow(() -> new IllegalArgumentException("Loja não encontrada: " + id));
         
         model.addAttribute("loja", loja);
-        model.addAttribute("products", produtoService.getProdutosPorLoja(id));
+        
+        // Filtrar produtos da loja que estejam incompletos
+        java.util.List<Produto> products = produtoService.getProdutosPorLoja(id).stream()
+            .filter(p -> p.getNome() != null && p.getPreco() != null && p.getUnidade() != null)
+            .toList();
+        model.addAttribute("products", products);
+        
         model.addAttribute("isLoggedIn", autenticacaoService.estaLogado());
         
         return "store-detail";

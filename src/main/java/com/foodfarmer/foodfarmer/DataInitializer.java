@@ -40,6 +40,30 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        System.out.println("Banco de dados limpo e inicializador de dados desativado.");
+        // Inicializador de dados mock para testes (descomente as seções abaixo para repopular o banco se estiver vazio)
+        
+        /*
+        if (usuarioRepository.count() == 0) {
+            Usuario producer = new Usuario(null, "Produtor Exemplo", "produtor@exemplo.com", "123", "00.000.000/0001-91", PapelUsuario.PRODUTOR, null);
+            Usuario customer = new Usuario(null, "Maria Silva", "maria@exemplo.com", "123", null, PapelUsuario.CLIENTE, null);
+            usuarioRepository.saveAll(List.of(producer, customer));
+
+            Categoria legumes = new Categoria(null, "Legumes", "bi-carrot");
+            Categoria frutas = new Categoria(null, "Frutas", "bi-apple");
+            categoriaRepository.saveAll(List.of(legumes, frutas));
+
+            Loja store1 = new Loja(null, "Horta do Zé", "Produtos frescos direto do produtor", 
+                "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=200", producer, null);
+            lojaRepository.save(store1);
+
+            Produto p1 = new Produto(null, "Cebola", "Cebola roxa fresca", new BigDecimal("5.50"), 
+                "https://images.unsplash.com/photo-1508747703725-719777637510?auto=format&fit=crop&q=80&w=400", "kg", true, 10, legumes, store1);
+            Produto p2 = new Produto(null, "Brócolis", "Brócolis ninja orgânico", new BigDecimal("8.00"), 
+                "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&q=80&w=400", "un", false, 0, legumes, store1);
+            produtoRepository.saveAll(List.of(p1, p2));
+        }
+        */
+
+        System.out.println("Aplicação iniciada. Verificação de dados mock concluída.");
     }
 }

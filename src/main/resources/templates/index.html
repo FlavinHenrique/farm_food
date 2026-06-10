@@ -115,7 +115,10 @@
                 <a th:href="@{'/produto/' + ${product.id}}" class="text-decoration-none text-dark">
                     <div class="card h-100 product-card">
                         <span class="discount-badge" th:text="${product.percentualDesconto} + '% OFF'">10% OFF</span>
-                        <img th:src="${product.urlImagem}" class="card-img-top" th:alt="${product.nome}">
+                        <img th:src="${product.urlImagem != null && !product.urlImagem.empty ? product.urlImagem : 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=600'}" 
+                             class="card-img-top" 
+                             th:alt="${product.nome}"
+                             onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=600'">
                         <div class="card-body">
                             <p class="text-muted small mb-1" th:text="${product.loja.nome}">Nome da Loja</p>
                             <h5 class="card-title fw-bold" th:text="${product.nome}">Cebola</h5>

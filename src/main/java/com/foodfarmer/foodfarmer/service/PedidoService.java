@@ -2,6 +2,7 @@ package com.foodfarmer.foodfarmer.service;
 
 import com.foodfarmer.foodfarmer.model.Loja;
 import com.foodfarmer.foodfarmer.model.Pedido;
+import com.foodfarmer.foodfarmer.model.Usuario;
 import com.foodfarmer.foodfarmer.repository.PedidoRepository;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,10 @@ public class PedidoService {
 
     public List<Pedido> getPedidosPorLojas(List<Loja> lojas) {
         return pedidoRepository.findByLojaIn(lojas);
+    }
+
+    public List<Pedido> getPedidosPorCliente(Usuario cliente) {
+        return pedidoRepository.findByClienteOrderByDataPedidoDesc(cliente);
     }
 
     public BigDecimal calcularFaturamentoTotal(List<Pedido> pedidos) {
