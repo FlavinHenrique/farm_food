@@ -61,6 +61,13 @@ public class ProdutoService {
         return produtoRepository.findByNome(nome);
     }
 
+    public List<Produto> buscarProdutosPorNome(String nome) {
+        if (nome == null || nome.trim().isEmpty()) {
+            return getTodosProdutos();
+        }
+        return produtoRepository.findByNomeContainingIgnoreCase(nome);
+    }
+
     public List<Produto> getProdutosPorLoja(Long lojaId) {
         if (lojaId == null) {
             return List.of();

@@ -27,7 +27,10 @@
                     <li class="nav-item"><a class="nav-link" href="#footer-info">Contato</a></li>
                 </ul>
                 <div class="d-flex align-items-center gap-3">
-                    <a href="/" class="text-dark"><i class="bi bi-search"></i></a>
+                    <form th:action="@{/produtos}" method="GET" class="d-flex align-items-center bg-light rounded-pill px-3 py-1" style="max-width: 250px;">
+                        <input type="text" name="search" class="form-control form-control-sm border-0 bg-transparent shadow-none" placeholder="Buscar produtos..." th:value="${searchTerm}">
+                        <button type="submit" class="btn btn-link text-dark p-0"><i class="bi bi-search"></i></button>
+                    </form>
                     <a th:if="${isLoggedIn}" th:href="@{/customer/messages}" class="text-dark"><i class="bi bi-chat-dots"></i></a>
                     <a th:if="${isLoggedIn}" th:href="@{/customer/profile}" class="text-dark"><i class="bi bi-person"></i></a>
                     <a th:if="${!isLoggedIn}" th:href="@{/login}" class="btn btn-primary-custom btn-sm">Entrar</a>
@@ -99,7 +102,7 @@
                 <p class="text-success fw-bold">Sobre nós</p>
                 <h2 class="fw-bold mb-4">Escolhas saudáveis a um clique</h2>
                 <p class="text-muted">Temos uma seleção rigorosa de produtores locais para garantir que sua mesa receba apenas o melhor da natureza. Produtos orgânicos, frescos e cultivados com amor e respeito ao meio ambiente.</p>
-                <button class="btn btn-primary-custom mt-3">Ver mais</button>
+                <a th:href="@{/faq}" class="btn btn-primary-custom mt-3">Ver mais</a>
             </div>
         </div>
     </section>
@@ -152,17 +155,17 @@
             <h3 class="section-title mb-0">Nossos Produtos</h3>
             
             <div class="filter-container">
-                <a th:href="@{/#products-section}" 
+                <a th:href="@{/}" 
                    class="btn-filter" 
                    th:classappend="${selectedCategoryId == null and selectedCategory == null} ? 'active'">Todos</a>
                 
                 <a th:each="cat : ${categories}" 
-                   th:href="@{/(categoriaId=${cat.id})#products-section}" 
+                   th:href="@{/ (categoriaId=${cat.id})}" 
                    th:text="${cat.nome}"
                    class="btn-filter"
                    th:classappend="${selectedCategoryId == cat.id} ? 'active'">Categoria</a>
                 
-                <a th:href="@{/(emOferta=true)#products-section}" 
+                <a th:href="@{/ (emOferta=true)}" 
                    class="btn-filter"
                    th:classappend="${selectedCategory == 'oferta'} ? 'active'">Ofertas</a>
             </div>
@@ -208,10 +211,9 @@
                 <div class="col-lg-2 mb-4">
                     <h5 class="fw-bold mb-4">Links</h5>
                     <ul class="list-unstyled">
-                        <li class="mb-2">Sobre nós</li>
-                        <li class="mb-2">Cardápio</li>
-                        <li class="mb-2">Notícias</li>
-                        <li class="mb-2">FAQ</li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Sobre nós</a></li>
+                        <li class="mb-2"><a th:href="@{/produtos}" class="text-decoration-none text-muted">Cardápio</a></li>
+                        <li class="mb-2"><a th:href="@{/faq}" class="text-decoration-none text-muted">FAQ</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3 mb-4">
