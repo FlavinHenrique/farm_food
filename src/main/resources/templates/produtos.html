@@ -116,7 +116,11 @@
                                     <h5 class="card-title fw-bold" th:text="${product.nome}">Nome do Produto</h5>
                                     <div class="d-flex justify-content-between align-items-center mt-3">
                                         <span class="btn btn-sm btn-success rounded-pill px-3">Ver detalhes</span>
-                                        <span class="fw-bold text-success" th:text="'R$ ' + ${product.preco}">R$ 0,00</span>
+                                        <div th:if="${product.emPromocao}" class="d-flex gap-2 align-items-center">
+                                            <span class="text-decoration-line-through text-muted small" th:text="'R$ ' + ${product.preco}">R$ 10,00</span>
+                                            <span class="fw-bold text-success" th:text="'R$ ' + ${product.precoComDesconto}">R$ 8,00</span>
+                                        </div>
+                                        <span th:unless="${product.emPromocao}" class="fw-bold text-success" th:text="'R$ ' + ${product.preco}">R$ 0,00</span>
                                     </div>
                                 </div>
                             </div>

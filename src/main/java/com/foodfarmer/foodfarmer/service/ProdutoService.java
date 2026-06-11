@@ -25,18 +25,18 @@ public class ProdutoService {
     }
 
     public List<Produto> getTodosProdutos() {
-        return produtoRepository.findAll();
+        return produtoRepository.findByAtivoTrue();
     }
 
     public List<Produto> getProdutosEmPromocao() {
-        return produtoRepository.findByEmPromocaoTrue();
+        return produtoRepository.findByEmPromocaoTrueAndAtivoTrue();
     }
 
     public List<Produto> getProdutosPorCategoria(Long categoriaId) {
         if (categoriaId == null) {
             return getTodosProdutos();
         }
-        return produtoRepository.findByCategoriaId(categoriaId);
+        return produtoRepository.findByCategoriaIdAndAtivoTrue(categoriaId);
     }
 
     public List<Categoria> getTodasCategorias() {
@@ -58,17 +58,24 @@ public class ProdutoService {
         if (nome == null) {
             return List.of();
         }
-        return produtoRepository.findByNome(nome);
+        return produtoRepository.findByNomeAndAtivoTrue(nome);
     }
 
     public List<Produto> buscarProdutosPorNome(String nome) {
         if (nome == null || nome.trim().isEmpty()) {
             return getTodosProdutos();
         }
-        return produtoRepository.findByNomeContainingIgnoreCase(nome);
+        return produtoRepository.findByNomeContainingIgnoreCaseAndAtivoTrue(nome);
     }
 
     public List<Produto> getProdutosPorLoja(Long lojaId) {
+        if (lojaId == null) {
+            return List.of();
+        }
+        return produtoRepository.findByLojaIdAndAtivoTrue(lojaId);
+    }
+
+    public List<Produto> getProdutosPorLojaIncluindoInativos(Long lojaId) {
         if (lojaId == null) {
             return List.of();
         }

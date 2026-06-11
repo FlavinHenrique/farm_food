@@ -13,6 +13,12 @@ public class Loja {
     private String nome;
     private String descricao;
     private String urlImagem;
+    private String especialidade;
+    private String endereco;
+    private String telefone;
+    private String horarioAtendimento;
+    private boolean aberta;
+    private boolean contaAtiva;
     
     @ManyToOne
     @JoinColumn(name = "dono_id")
@@ -21,11 +27,19 @@ public class Loja {
     @OneToMany(mappedBy = "loja", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Produto> produtos;
 
-    public Loja(Long id, String nome, String descricao, String urlImagem, Usuario dono, List<Produto> produtos) {
+    public Loja(Long id, String nome, String descricao, String urlImagem, String especialidade, 
+                String endereco, String telefone, String horarioAtendimento, boolean aberta, 
+                boolean contaAtiva, Usuario dono, List<Produto> produtos) {
         this.id = id;
         this.nome = nome;
         this.descricao = descricao;
         this.urlImagem = urlImagem;
+        this.especialidade = especialidade;
+        this.endereco = endereco;
+        this.telefone = telefone;
+        this.horarioAtendimento = horarioAtendimento;
+        this.aberta = aberta;
+        this.contaAtiva = contaAtiva;
         this.dono = dono;
         this.produtos = produtos;
     }
@@ -40,6 +54,18 @@ public class Loja {
     public void setDescricao(String descricao) { this.descricao = descricao; }
     public String getUrlImagem() { return urlImagem; }
     public void setUrlImagem(String urlImagem) { this.urlImagem = urlImagem; }
+    public String getEspecialidade() { return especialidade; }
+    public void setEspecialidade(String especialidade) { this.especialidade = especialidade; }
+    public String getEndereco() { return endereco; }
+    public void setEndereco(String endereco) { this.endereco = endereco; }
+    public String getTelefone() { return telefone; }
+    public void setTelefone(String telefone) { this.telefone = telefone; }
+    public String getHorarioAtendimento() { return horarioAtendimento; }
+    public void setHorarioAtendimento(String horarioAtendimento) { this.horarioAtendimento = horarioAtendimento; }
+    public boolean isAberta() { return aberta; }
+    public void setAberta(boolean aberta) { this.aberta = aberta; }
+    public boolean isContaAtiva() { return contaAtiva; }
+    public void setContaAtiva(boolean contaAtiva) { this.contaAtiva = contaAtiva; }
     public Usuario getDono() { return dono; }
     public void setDono(Usuario dono) { this.dono = dono; }
     public List<Produto> getProdutos() { return produtos; }

@@ -46,9 +46,6 @@
                 <a th:href="@{/customer/payments}" class="profile-menu-item">
                     <i class="bi bi-credit-card"></i> Pagamentos
                 </a>
-                <a href="#" class="profile-menu-item">
-                    <i class="bi bi-star-fill"></i> Favoritos
-                </a>
                 
                 <a th:href="@{/logout}" class="logout-link">
                     Sair da conta
@@ -60,30 +57,30 @@
                 <h1 class="profile-title" th:text="${usuario.nome}">Nome do cliente</h1>
                 
                 <div class="profile-card">
-                    <form th:action="@{/customer/profile/update}" method="POST">
+                    <form th:action="@{/customer/profile/update}" method="POST" th:object="${usuario}">
                         <div class="mb-3">
-                            <input type="text" class="form-control profile-input" th:value="${usuario.nome}" placeholder="Nome" name="nome">
+                            <input type="text" class="form-control profile-input" th:field="*{nome}" placeholder="Nome">
                         </div>
                         <div class="mb-3">
-                            <input type="email" class="form-control profile-input" th:value="${usuario.email}" placeholder="Email" name="email">
+                            <input type="email" class="form-control profile-input" th:field="*{email}" placeholder="Email">
                         </div>
                         <div class="mb-3">
-                            <input type="text" class="form-control profile-input" placeholder="Telefone">
+                            <input type="text" class="form-control profile-input" th:field="*{telefone}" placeholder="Telefone">
                         </div>
                         <div class="row">
                             <div class="col-md-7">
-                                <input type="text" class="form-control profile-input" placeholder="CPF">
+                                <input type="text" class="form-control profile-input" th:field="*{cpf}" placeholder="CPF">
                             </div>
                             <div class="col-md-5">
-                                <input type="text" class="form-control profile-input" placeholder="16/22/2021">
+                                <input type="text" class="form-control profile-input" placeholder="Data de nascimento (opcional)">
                             </div>
                         </div>
                         <div class="mb-3">
-                            <input type="password" class="form-control profile-input" placeholder="Senha atual" name="senha">
+                            <input type="password" class="form-control profile-input" placeholder="Nova senha (opcional)" name="novaSenha">
                         </div>
                         
                         <div class="clearfix">
-                            <button type="submit" class="btn btn-edit-profile">Editar</button>
+                            <button type="submit" class="btn btn-edit-profile">Salvar</button>
                         </div>
                     </form>
                 </div>

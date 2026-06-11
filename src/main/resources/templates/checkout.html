@@ -680,6 +680,24 @@
             btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processando...';
             btn.disabled = true;
 
+            
+            const cep = document.getElementById('cep')?.value || '';
+            const logradouro = document.getElementById('logradouro')?.value || '';
+            const numero = document.getElementById('numero')?.value || '';
+            const complemento = document.getElementById('complemento')?.value || '';
+            const bairro = document.getElementById('bairro')?.value || '';
+            const cidadeUf = document.getElementById('cidade_uf')?.value || '';
+            
+            let cidade = '';
+            let estado = '';
+            if (cidadeUf.includes('/')) {
+                const parts = cidadeUf.split('/');
+                cidade = parts[0].trim();
+                estado = parts[1].trim();
+            } else {
+                cidade = cidadeUf;
+            }
+
             const pedidoDTO = {
                 itens: cart.map(item => ({
                     produtoId: item.id,
@@ -688,7 +706,15 @@
                         parseFloat(item.price.replace('R$', '').replace(/\s/g, '').replace(',', '.')) : item.price
                 })),
                 valorTotal: total,
-                status: 'Pendente'
+                status: 'Pendente',
+                cepEntrega: cep,
+                logradouroEntrega: logradouro,
+                numeroEntrega: numero,
+                complementoEntrega: complemento,
+                bairroEntrega: bairro,
+                cidadeEntrega: cidade,
+                estadoEntrega: estado,
+                regiaoEntrega: bairro || cidade
             };
 
             try {

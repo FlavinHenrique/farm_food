@@ -90,13 +90,19 @@ public class ClienteController {
     }
 
     @PostMapping("/profile/update")
-    public String updateProfile(@ModelAttribute Usuario usuario) {
+    public String updateProfile(@ModelAttribute Usuario usuario, @org.springframework.web.bind.annotation.RequestParam(required = false) String novaSenha) {
         if (!autenticacaoService.estaLogado()) return "redirect:/login";
         
         Usuario atual = autenticacaoService.getUsuarioAtual().get();
         atual.setNome(usuario.getNome());
         atual.setEmail(usuario.getEmail());
-        // Não atualizamos a senha aqui por segurança, ou teríamos um campo específico
+        atual.setTelefone(usuario.getTelefone());
+        atual.setCpf(usuario.getCpf());
+        
+        // Atualizar senha apenas se novaSenha for fornecida
+        if (novaSenha != null && !novaSenha.isBlank()) {
+            atual.setSenha(novaSenha); // Em produção você deve criptografar a senha!
+        }
         
         usuarioService.atualizar(atual);
         autenticacaoService.login(atual); // Atualiza na sessão

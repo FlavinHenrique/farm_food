@@ -248,14 +248,16 @@
                     </div>
                     
                     <div class="price-container">
-                        <span class="price-tag" th:text="'R$ ' + ${produto.preco}">R$ 0,00</span>
-                        <span class="text-muted fs-5" th:text="' / ' + ${produto.unidade}"> / kg</span>
-                        
-                        <th:block th:if="${produto.emPromocao}">
-                            <span class="original-price" th:text="'R$ ' + ${#numbers.formatDecimal(produto.preco * 1.25, 1, 2)}">R$ 0,00</span>
-                            <span class="discount-badge-inline">-20%</span>
-                        </th:block>
-                    </div>
+        <th:block th:if="${produto.emPromocao and produto.percentualDesconto != null and produto.percentualDesconto > 0}">
+            <span class="original-price" th:text="'R$ ' + ${produto.preco}">R$ 0,00</span>
+            <span class="price-tag" th:text="'R$ ' + ${produto.precoComDesconto}">R$ 0,00</span>
+            <span class="discount-badge-inline" th:text="'-' + ${produto.percentualDesconto} + '%'">-20%</span>
+        </th:block>
+        <th:block th:unless="${produto.emPromocao and produto.percentualDesconto != null and produto.percentualDesconto > 0}">
+            <span class="price-tag" th:text="'R$ ' + ${produto.preco}">R$ 0,00</span>
+        </th:block>
+        <span class="text-muted fs-5" th:text="' / ' + ${produto.unidade}"> / kg</span>
+    </div>
 
                     <p class="text-muted mb-4" th:text="${produto.descricao}">Descrição completa do produto e seus benefícios para a saúde.</p>
                     
@@ -284,11 +286,7 @@
                     <div class="row g-3 mb-4">
                     </div>
 
-                    <!-- Observações -->
-                    <div class="mb-4">
-                        <label for="observacoes" class="form-label fw-bold text-dark">Instruções para o produtor?</label>
-                        <textarea class="form-control bg-light border-0" id="observacoes" rows="2" placeholder="Ex: Preferência por produtos mais verdes ou maduros..."></textarea>
-                    </div>
+
 
                     <!-- Desktop Actions -->
                     <div class="action-container">

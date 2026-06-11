@@ -68,8 +68,8 @@ public class LoginController {
             return "/producer/dashboard";
         }
         if (usuario.getPapel() == PapelUsuario.ENTREGADOR) {
-            return "/delivery/dashboard";
+            return "/delivery/available";
         }
-        return "/customer/profile";
+        return "/";
     }
 }

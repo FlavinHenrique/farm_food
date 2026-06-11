@@ -58,11 +58,15 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold">Preço (R$)</label>
                         <input type="number" step="0.01" th:field="*{preco}" class="form-control" placeholder="0,00" required>
                     </div>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Estoque</label>
+                        <input type="number" th:field="*{estoque}" class="form-control" placeholder="0">
+                    </div>
+                    <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold">Categoria</label>
                         <div class="input-group">
                             <select th:field="*{categoria.id}" class="form-select" required>
@@ -87,9 +91,19 @@
                 </div>
 
                 <div class="mb-4">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" th:field="*{emPromocao}" id="onSaleSwitch">
-                        <label class="form-check-label fw-bold" for="onSaleSwitch">Produto em Oferta?</label>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" th:field="*{ativo}" id="ativoSwitch">
+                                <label class="form-check-label fw-bold" for="ativoSwitch">Produto Ativo</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" th:field="*{emPromocao}" id="onSaleSwitch">
+                                <label class="form-check-label fw-bold" for="onSaleSwitch">Produto em Oferta?</label>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

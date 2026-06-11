@@ -1,25 +1,24 @@
 package com.foodfarmer.foodfarmer.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.foodfarmer.foodfarmer.model.Loja;
@@ -45,6 +44,8 @@ class PedidoServiceTest {
     private ClienteService clienteService;
     @Mock
     private EntregadorNotificationService entregadorNotificationService;
+    @Mock
+    private PagamentoService pagamentoService;
 
     private PedidoService pedidoService;
 
@@ -55,7 +56,8 @@ class PedidoServiceTest {
             produtoRepository,
             usuarioRepository,
             clienteService,
-            entregadorNotificationService
+            entregadorNotificationService,
+            pagamentoService
         );
     }
 
@@ -63,8 +65,8 @@ class PedidoServiceTest {
     void criarPedidosCheckoutDeveGerarPedidoAtribuidoENotificarEntregador() {
         Usuario cliente = usuario(1L, "Cliente", PapelUsuario.CLIENTE);
         Usuario entregador = usuario(2L, "Entregador", PapelUsuario.ENTREGADOR);
-        Loja loja = new Loja(10L, "Horta", "Descricao", "img", usuario(3L, "Produtor", PapelUsuario.PRODUTOR), null);
-        Produto produto = new Produto(7L, "Tomate", "Fresco", new BigDecimal("12.50"), "img", "kg", false, 0, null, loja);
+        Loja loja = new Loja(10L, "Horta", "Descricao", "img", null, null, null, null, false, false, usuario(3L, "Produtor", PapelUsuario.PRODUTOR), null);
+        Produto produto = new Produto(7L, "Tomate", "Fresco", new BigDecimal("12.50"), "img", "kg", null, false, 0, true, null, loja);
 
         when(produtoRepository.findById(7L)).thenReturn(Optional.of(produto));
         when(usuarioRepository.findByPapel(PapelUsuario.ENTREGADOR)).thenReturn(List.of(entregador));

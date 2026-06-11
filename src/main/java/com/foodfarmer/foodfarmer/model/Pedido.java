@@ -22,7 +22,9 @@ public class Pedido {
     
     private LocalDateTime dataPedido;
     private BigDecimal valorTotal;
-    private String status; // ex: "Pendente", "Finalizado", "Cancelado"
+    private BigDecimal valorProdutos; // soma dos preços dos produtos
+    private BigDecimal valorDesconto; // valor do desconto aplicado
+    private String status; // ex: "Pendente", "Pago", "Finalizado", "Cancelado"
 
     @ManyToOne
     @JoinColumn(name = "entregador_id")
@@ -30,6 +32,14 @@ public class Pedido {
 
     @Enumerated(EnumType.STRING)
     private StatusEntrega statusEntrega;
+
+    @Enumerated(EnumType.STRING)
+    private TipoMetodoPagamento tipoMetodoPagamento;
+
+    @Enumerated(EnumType.STRING)
+    private StatusPagamento statusPagamento;
+
+    private boolean repasseLiberado; // se o valor já pode ser repassado ao produtor
 
     private LocalDateTime prazoEntrega;
     private LocalDateTime inicioRotaEm;
@@ -82,8 +92,18 @@ public class Pedido {
     public void setDataPedido(LocalDateTime dataPedido) { this.dataPedido = dataPedido; }
     public BigDecimal getValorTotal() { return valorTotal; }
     public void setValorTotal(BigDecimal valorTotal) { this.valorTotal = valorTotal; }
+    public BigDecimal getValorProdutos() { return valorProdutos; }
+    public void setValorProdutos(BigDecimal valorProdutos) { this.valorProdutos = valorProdutos; }
+    public BigDecimal getValorDesconto() { return valorDesconto; }
+    public void setValorDesconto(BigDecimal valorDesconto) { this.valorDesconto = valorDesconto; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    public TipoMetodoPagamento getTipoMetodoPagamento() { return tipoMetodoPagamento; }
+    public void setTipoMetodoPagamento(TipoMetodoPagamento tipoMetodoPagamento) { this.tipoMetodoPagamento = tipoMetodoPagamento; }
+    public StatusPagamento getStatusPagamento() { return statusPagamento; }
+    public void setStatusPagamento(StatusPagamento statusPagamento) { this.statusPagamento = statusPagamento; }
+    public boolean isRepasseLiberado() { return repasseLiberado; }
+    public void setRepasseLiberado(boolean repasseLiberado) { this.repasseLiberado = repasseLiberado; }
     public List<ItemPedido> getItens() { return itens; }
     public void setItens(List<ItemPedido> itens) { this.itens = itens; }
     public Usuario getEntregador() { return entregador; }
