@@ -44,20 +44,16 @@ public class EntregadorController {
 
     @GetMapping("/dashboard")
     public String dashboard(Model model,
-                            @RequestParam(required = false) String filtroStatus,
-                            @RequestParam(required = false) String regiao,
                             @RequestParam(required = false, defaultValue = "false") boolean somenteHistorico) {
         Usuario entregador = getEntregadorLogado();
         if (entregador == null) {
             return "redirect:/login?redirect=/delivery/dashboard";
         }
 
-        List<Pedido> pedidos = pedidoService.listarPedidosEntregador(entregador, filtroStatus, regiao, null, somenteHistorico);
+        List<Pedido> pedidos = pedidoService.listarPedidosEntregador(entregador, null, null, null, somenteHistorico);
 
         model.addAttribute("user", entregador);
         model.addAttribute("pedidos", pedidos);
-        model.addAttribute("filtroStatus", filtroStatus);
-        model.addAttribute("regiao", regiao);
         return "delivery/dashboard";
     }
 

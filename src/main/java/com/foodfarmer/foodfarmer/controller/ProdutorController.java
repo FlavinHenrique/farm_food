@@ -88,7 +88,7 @@ public class ProdutorController {
         java.util.List<Loja> lojas = lojaService.getLojasPorDono(produtor);
         java.util.List<Produto> produtos = new java.util.ArrayList<>();
         for (Loja loja : lojas) {
-            produtos.addAll(loja.getProdutos());
+            produtos.addAll(produtoService.getProdutosPorLojaIncluindoInativos(loja.getId()));
         }
         
         model.addAttribute("stores", lojas);
@@ -206,6 +206,13 @@ public class ProdutorController {
     public String deleteProduct(@PathVariable("id") Long id) {
         if (!autenticacaoService.estaLogado()) return "redirect:/login";
         produtoService.excluirProduto(id);
+        return "redirect:/producer/products";
+    }
+
+    @GetMapping("/product/activate/{id}")
+    public String activateProduct(@PathVariable("id") Long id) {
+        if (!autenticacaoService.estaLogado()) return "redirect:/login";
+        produtoService.reativarProduto(id);
         return "redirect:/producer/products";
     }
 

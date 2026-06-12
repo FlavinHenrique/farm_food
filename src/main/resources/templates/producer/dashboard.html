@@ -258,16 +258,11 @@
 <body>
 
     <div class="wrapper">
-        <!-- Sidebar -->
+        
         <div class="sidebar">
             <a href="/" class="sidebar-brand">FarmFood</a>
             
             <ul class="nav-menu">
-                <li class="nav-item">
-                    <a th:href="@{/producer/dashboard}" class="nav-link active">
-                        <i class="bi bi-grid-fill"></i> Dashboard
-                    </a>
-                </li>
                 <li class="nav-item">
                     <a th:href="@{/producer/stores}" class="nav-link">
                         <i class="bi bi-shop"></i> Minhas lojas
@@ -293,11 +288,6 @@
                     </a>
                 </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="bi bi-gear-fill"></i> Configurações
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a th:href="@{/logout}" class="nav-link">
                             <i class="bi bi-box-arrow-right"></i> Sair
                         </a>
@@ -306,7 +296,7 @@
             </div>
         </div>
 
-        <!-- Main Content -->
+        
         <div class="main-content">
             <header class="top-header">
                 <h1 class="user-greeting" th:text="'Olá produtor ' + ${produtor.nome}">Olá produtor João</h1>
@@ -321,7 +311,7 @@
             </header>
 
             <div class="dashboard-grid">
-                <!-- General Dashboard Chart -->
+                
                 <div class="card full-width-card">
                     <div class="card-header-flex">
                         <h2 class="card-title mb-0">Dashboard geral</h2>
@@ -336,7 +326,7 @@
                     <canvas id="generalChart" height="100"></canvas>
                 </div>
 
-                <!-- Rendimentos -->
+                
                 <div class="card">
                     <div class="text-center">
                         <h2 class="card-title">Rendimentos</h2>
@@ -347,7 +337,7 @@
                     <canvas id="yieldChart" height="150"></canvas>
                 </div>
 
-                <!-- Últimas Vendas -->
+                
                 <div class="card">
                     <h2 class="card-title">Últimas Vendas</h2>
                     <ul class="store-list">

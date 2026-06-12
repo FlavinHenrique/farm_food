@@ -65,7 +65,7 @@ public class LoginController {
             return "/";
         }
         if (usuario.getPapel() == PapelUsuario.PRODUTOR) {
-            return "/producer/dashboard";
+            return "/producer/stores";
         }
         if (usuario.getPapel() == PapelUsuario.ENTREGADOR) {
             return "/delivery/available";

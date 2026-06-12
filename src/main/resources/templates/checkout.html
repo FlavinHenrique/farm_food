@@ -64,7 +64,7 @@
 </head>
 <body>
 
-    <!-- Navbar Minimalista para Checkout -->
+    
     <nav class="navbar navbar-expand-lg bg-white border-bottom py-3">
         <div class="container d-flex justify-content-center position-relative">
             <a th:href="@{/cart}" class="position-absolute start-0 text-muted text-decoration-none d-none d-md-block" style="top: 50%; transform: translateY(-50%);">
@@ -79,10 +79,10 @@
     <div class="container py-5">
         <div class="row g-4">
             
-            <!-- Formulários (Esquerda) -->
+            
             <div class="col-lg-8">
                 
-                <!-- Progresso -->
+                
                 <div class="steps-container">
                     <div class="step active" id="step-indicator-1">
                         <div class="step-icon">1</div>
@@ -100,7 +100,7 @@
 
                 <form id="checkout-form" novalidate>
                     
-                    <!-- Passo 1: Identificação -->
+                    
                     <div class="checkout-container" id="step-1">
                         <h3 class="section-title"><i class="bi bi-person"></i> Dados Pessoais</h3>
                         <div class="row g-3">
@@ -130,11 +130,11 @@
                         </div>
                     </div>
 
-                    <!-- Passo 2: Entrega -->
+                    
                     <div class="checkout-container d-none" id="step-2">
                         <h3 class="section-title"><i class="bi bi-geo-alt"></i> Endereço de Entrega</h3>
                         
-                        <!-- Seleção de Endereços Salvos -->
+                        
                         <div th:if="${not #lists.isEmpty(addresses)}" class="mb-4" id="saved-addresses-section">
                             <p class="text-muted small mb-3">Selecione um endereço salvo ou cadastre um novo:</p>
                             <div class="row g-3">
@@ -176,7 +176,7 @@
                             </div>
                         </div>
 
-                        <!-- Formulário de Endereço -->
+                        
                         <div id="address-form-container" th:classappend="${not #lists.isEmpty(addresses)} ? 'd-none' : ''">
                             <div th:if="${not #lists.isEmpty(addresses)}" class="mb-4">
                                 <button type="button" class="btn btn-sm btn-link text-success p-0 text-decoration-none" onclick="hideNewAddressForm()">
@@ -231,7 +231,7 @@
                         </div>
                     </div>
 
-                    <!-- Passo 3: Pagamento -->
+                    
                     <div class="checkout-container d-none" id="step-3">
                         <h3 class="section-title"><i class="bi bi-credit-card"></i> Forma de Pagamento</h3>
                         
@@ -262,7 +262,7 @@
                             </div>
                         </div>
 
-                        <!-- Dados do Cartão -->
+                        
                         <div id="card-details" class="d-none bg-light p-4 rounded-3 border">
                             <div class="row g-3">
                                 <div class="col-12">
@@ -292,7 +292,7 @@
                             </div>
                         </div>
                         
-                        <!-- Mensagem PIX -->
+                        
                         <div id="pix-details" class="bg-light p-4 rounded-3 border text-center">
                             <i class="bi bi-qr-code text-success" style="font-size: 3rem;"></i>
                             <p class="mt-2 mb-0">O código PIX será gerado após a finalização do pedido.</p>
@@ -307,13 +307,13 @@
                 </form>
             </div>
             
-            <!-- Resumo (Direita) -->
+            
             <div class="col-lg-4">
                 <div class="summary-card shadow-sm">
                     <h4 class="fw-bold mb-4">Seu Pedido</h4>
                     
                     <div id="checkout-items" class="mb-4">
-                        <!-- Itens via JS -->
+                        
                     </div>
                     
                     <hr class="text-muted">
@@ -349,7 +349,7 @@
         </div>
     </div>
 
-    <!-- Modal Sucesso -->
+    
     <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 border-radius-lg text-center p-4">
@@ -381,7 +381,7 @@
         }
 
         let subtotal = 0;
-        const shipping = 15.90; // Frete fixo
+        const shipping = 10.00; // Frete fixo de R$10,00
         let discount = 0;
         let total = 0;
 

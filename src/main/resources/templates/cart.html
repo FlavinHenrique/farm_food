@@ -61,7 +61,7 @@
 </head>
 <body>
 
-    <!-- Navbar -->
+    
     <nav class="navbar navbar-expand-lg sticky-top shadow-sm">
         <div class="container">
             <a class="navbar-brand" th:href="@{/}">
@@ -83,29 +83,19 @@
         <h2 class="fw-bold mb-4">Meu Carrinho</h2>
         
         <div class="row g-4" id="cart-content">
-            <!-- Items Column -->
+            
             <div class="col-lg-8">
                 <div class="cart-container" id="cart-items-container">
-                    <!-- Items will be injected here via JS -->
+                    
                 </div>
             </div>
             
-            <!-- Summary Column -->
+            
             <div class="col-lg-4">
                 <div class="summary-card">
                     <h3 class="summary-title">Resumo da Compra</h3>
                     
-                    <div class="shipping-box">
-                        <input type="text" id="cep-input" class="form-control" placeholder="Calcular CEP" maxlength="9">
-                        <button class="btn btn-outline-secondary" onclick="calculateShipping()">Calcular</button>
-                    </div>
-                    <div id="shipping-msg" class="small text-muted mb-3 d-none"></div>
-                    
-                    <div class="coupon-box">
-                        <input type="text" id="coupon-input" class="form-control" placeholder="Cupom de desconto">
-                        <button class="btn btn-outline-secondary" onclick="applyCoupon()">Aplicar</button>
-                    </div>
-                    <div id="coupon-msg" class="small mb-3 d-none"></div>
+
 
                     <div class="summary-row">
                         <span>Subtotal</span>
@@ -279,31 +269,21 @@
         function updateSummary(subtotal) {
             document.getElementById('summary-subtotal').innerText = formatCurrency(subtotal);
             
-            if(shippingCost > 0) {
-                document.getElementById('summary-shipping').innerText = formatCurrency(shippingCost);
-            } else {
-                document.getElementById('summary-shipping').innerText = '--';
-            }
+            // Frete fixo de R$10,00
+            const shippingCost = 10.00;
+            document.getElementById('summary-shipping').innerText = formatCurrency(shippingCost);
             
+            // Sem cupom de desconto
             const rowDiscount = document.getElementById('row-discount');
-            if(discountVal > 0) {
-                document.getElementById('summary-discount').innerText = '- ' + formatCurrency(discountVal);
-                rowDiscount.classList.remove('d-none');
-            } else {
-                rowDiscount.classList.add('d-none');
-            }
+            rowDiscount.classList.add('d-none');
             
-            let total = subtotal + shippingCost - discountVal;
+            let total = subtotal + shippingCost;
             if(total < 0) total = 0;
             
             document.getElementById('summary-total').innerText = formatCurrency(total);
         }
 
-        // Initialize
-        document.getElementById('cep-input').addEventListener('input', function (e) {
-            var x = e.target.value.replace(/\D/g, '').match(/(\d{0,5})(\d{0,3})/);
-            e.target.value = !x[2] ? x[1] : x[1] + '-' + x[2];
-        });
+
 
         renderCart();
         updateCartBadge();

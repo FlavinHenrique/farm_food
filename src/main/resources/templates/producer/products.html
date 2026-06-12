@@ -244,16 +244,11 @@
 <body>
 
     <div class="wrapper">
-        <!-- Sidebar -->
+        
         <div class="sidebar">
             <a href="/" class="sidebar-brand">FarmFood</a>
             
             <ul class="nav-menu">
-                <li class="nav-item">
-                    <a th:href="@{/producer/dashboard}" class="nav-link">
-                        <i class="bi bi-grid-fill"></i> Dashboard
-                    </a>
-                </li>
                 <li class="nav-item">
                     <a th:href="@{/producer/stores}" class="nav-link">
                         <i class="bi bi-shop"></i> Minhas lojas
@@ -265,7 +260,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a th:href="@{/producer/vendas}" class="nav-link">
                         <i class="bi bi-bar-chart-line-fill"></i> Vendas
                     </a>
                 </li>
@@ -279,11 +274,6 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="bi bi-gear-fill"></i> Configurações
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a th:href="@{/logout}" class="nav-link">
                             <i class="bi bi-box-arrow-right"></i> Sair
                         </a>
@@ -292,7 +282,7 @@
             </div>
         </div>
 
-        <!-- Main Content -->
+        
         <div class="main-content">
             <header class="top-header">
                 <h1 class="page-title">Gerenciar Produtos</h1>
@@ -349,15 +339,20 @@
                                     <span class="price-text" th:text="'R$ ' + ${product.preco} + ' / ' + ${product.unidade}">R$ 0,00</span>
                                 </td>
                                 <td>
-                                    <span class="badge rounded-pill bg-success-subtle text-success px-3 py-2">Ativo</span>
+                                    <span th:if="${product.ativo}" class="badge rounded-pill bg-success-subtle text-success px-3 py-2">Ativo</span>
+                                    <span th:unless="${product.ativo}" class="badge rounded-pill bg-danger-subtle text-danger px-3 py-2">Inativo</span>
                                 </td>
                                 <td class="text-end">
-                                    <a th:href="@{'/producer/product/edit/' + ${product.id}}" class="btn-edit-product">
+                                    <a th:if="${product.ativo}" th:href="@{'/producer/product/edit/' + ${product.id}}" class="btn-edit-product">
                                         <i class="bi bi-pencil-fill"></i>
                                     </a>
-                                    <a th:href="@{'/producer/product/delete/' + ${product.id}}" class="btn-delete-product" 
-                                       onclick="return confirm('Tem certeza que deseja excluir este produto?')">
+                                    <a th:if="${product.ativo}" th:href="@{'/producer/product/delete/' + ${product.id}}" class="btn-delete-product" 
+                                       onclick="return confirm('Tem certeza que deseja inativar este produto?')">
                                         <i class="bi bi-trash-fill"></i>
+                                    </a>
+                                    <a th:if="${!product.ativo}" th:href="@{'/producer/product/activate/' + ${product.id}}" class="btn-edit-product" 
+                                       onclick="return confirm('Deseja reativar este produto?')">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
                                     </a>
                                 </td>
                             </tr>

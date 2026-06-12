@@ -38,7 +38,7 @@
 
             <form th:action="@{/producer/product/save}" th:object="${product}" method="post">
                 <input type="hidden" th:field="*{id}">
-                <!-- Usando tanto o th:field quanto um name manual para garantir que o ID da loja chegue ao servidor -->
+                
                 <input type="hidden" th:field="*{loja.id}" name="lojaId">
                 
                 <div class="row">
@@ -121,7 +121,7 @@
         </div>
     </div>
 
-    <!-- Modal Nova Categoria -->
+    
     <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-4 border-0 shadow">
@@ -132,7 +132,7 @@
                 <div class="modal-body p-4">
                     <p class="text-muted small mb-4">Crie uma nova categoria para organizar seus produtos.</p>
                     <form th:action="@{/producer/category/save}" th:object="${newCategory}" method="post">
-                        <!-- Campo oculto para saber de onde veio e poder voltar -->
+                        
                         <input type="hidden" name="storeId" th:value="${storeId}">
                         
                         <div class="mb-3">
