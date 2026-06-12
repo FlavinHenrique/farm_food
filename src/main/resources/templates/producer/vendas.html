@@ -172,16 +172,11 @@
 <body>
 
     <div class="wrapper">
-        <!-- Sidebar -->
+        
         <div class="sidebar">
             <a href="/" class="sidebar-brand">FarmFood</a>
             
             <ul class="nav-menu">
-                <li class="nav-item">
-                    <a th:href="@{/producer/dashboard}" class="nav-link">
-                        <i class="bi bi-grid-fill"></i> Dashboard
-                    </a>
-                </li>
                 <li class="nav-item">
                     <a th:href="@{/producer/stores}" class="nav-link">
                         <i class="bi bi-shop"></i> Minhas lojas
@@ -207,11 +202,6 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="bi bi-gear-fill"></i> Configurações
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a th:href="@{/logout}" class="nav-link">
                             <i class="bi bi-box-arrow-right"></i> Sair
                         </a>
@@ -220,7 +210,7 @@
             </div>
         </div>
 
-        <!-- Main Content -->
+        
         <div class="main-content">
             <header class="top-header">
                 <h1 class="page-title">Histórico de Vendas</h1>

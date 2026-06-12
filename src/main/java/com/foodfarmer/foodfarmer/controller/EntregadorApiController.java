@@ -41,13 +41,10 @@ public class EntregadorApiController {
 
     @GetMapping("/pedidos")
     public List<DeliveryCardResponse> listarPedidos(
-        @RequestParam(required = false) String status,
-        @RequestParam(required = false) String regiao,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime prazoAntesDe,
         @RequestParam(defaultValue = "false") boolean historico
     ) {
         Usuario entregador = requireEntregador();
-        return pedidoService.listarPedidosEntregador(entregador, status, regiao, prazoAntesDe, historico).stream()
+        return pedidoService.listarPedidosEntregador(entregador, null, null, null, historico).stream()
             .map(this::toResponse)
             .toList();
     }

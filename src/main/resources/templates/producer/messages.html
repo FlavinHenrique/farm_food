@@ -261,16 +261,11 @@
 <body>
 
     <div class="wrapper">
-        <!-- Sidebar -->
+        
         <div class="sidebar">
             <a href="/" class="sidebar-brand">FarmFood</a>
             
             <ul class="nav-menu">
-                <li class="nav-item">
-                    <a th:href="@{/producer/dashboard}" class="nav-link">
-                        <i class="bi bi-grid-fill"></i> Dashboard
-                    </a>
-                </li>
                 <li class="nav-item">
                     <a th:href="@{/producer/stores}" class="nav-link">
                         <i class="bi bi-shop"></i> Minhas lojas
@@ -282,7 +277,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a th:href="@{/producer/vendas}" class="nav-link">
                         <i class="bi bi-bar-chart-line-fill"></i> Vendas
                     </a>
                 </li>
@@ -296,11 +291,6 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="bi bi-gear-fill"></i> Configurações
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a th:href="@{/logout}" class="nav-link">
                             <i class="bi bi-box-arrow-right"></i> Sair
                         </a>
@@ -309,20 +299,20 @@
             </div>
         </div>
 
-        <!-- Main Content -->
+        
         <div class="main-content">
             <header class="top-header mb-4">
                 <h1 class="page-title fs-3 fw-bold">Mensagens</h1>
             </header>
 
             <div class="chat-wrapper">
-                <!-- Contatos -->
+                
                 <div class="contacts-list">
                     <div class="p-3 border-bottom bg-light">
                         <h6 class="mb-0 fw-bold">Conversas Recentes</h6>
                     </div>
                     
-                    <!-- Lista de contatos únicos -->
+                    
                     <div th:each="contato : ${contatos}">
                         <a th:href="@{/producer/messages(contactId=${contato.id})}" 
                            class="contact-item" 
@@ -337,7 +327,7 @@
                     </div>
                 </div>
 
-                <!-- Área de Chat -->
+                
                 <div class="chat-area">
                     <div th:if="${contatoAtivo != null}" class="h-100 d-flex flex-direction-column" style="display: flex; flex-direction: column; flex-grow: 1;">
                         <div class="chat-header">

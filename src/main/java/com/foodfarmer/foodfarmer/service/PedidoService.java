@@ -86,7 +86,8 @@ public class PedidoService {
                 .add(new CheckoutResolvedItem(produto, quantidade, precoUnitario, subtotal));
         }
 
-        BigDecimal shipping = safeMoney(request.shipping()).max(BigDecimal.ZERO);
+        // Frete fixo de R$10,00
+        BigDecimal shipping = new BigDecimal("10.00");
         BigDecimal discount = safeMoney(request.discount()).max(BigDecimal.ZERO);
 
         List<Pedido> pedidos = new ArrayList<>();
@@ -172,9 +173,6 @@ public class PedidoService {
 
         return pedidos.stream()
             .filter(p -> !somenteHistorico || isHistorico(p.getStatusEntrega()))
-            .filter(p -> applyFiltroStatus(p.getStatusEntrega(), filtroStatus))
-            .filter(p -> !StringUtils.hasText(regiao) || containsIgnoreCase(p.getRegiaoEntrega(), regiao))
-            .filter(p -> prazoAntesDe == null || (p.getPrazoEntrega() != null && !p.getPrazoEntrega().isAfter(prazoAntesDe)))
             .sorted(Comparator.comparing(Pedido::getPrazoEntrega, Comparator.nullsLast(Comparator.naturalOrder())))
             .toList();
     }
@@ -321,9 +319,14 @@ public class PedidoService {
         String filtro = filtroStatus.trim().toUpperCase();
         return switch (filtro) {
             case "PENDENTE" -> statusEntrega == StatusEntrega.PENDENTE;
+            case "ACEITO" -> statusEntrega == StatusEntrega.ACEITO;
+            case "EM_ROTA" -> statusEntrega == StatusEntrega.EM_ROTA;
+            case "CHEGOU_DESTINO" -> statusEntrega == StatusEntrega.CHEGOU_DESTINO;
+            case "ENTREGUE" -> statusEntrega == StatusEntrega.ENTREGUE;
+            case "PROBLEMA" -> statusEntrega == StatusEntrega.PROBLEMA;
+            case "CANCELADO" -> statusEntrega == StatusEntrega.CANCELADO;
             case "EM_ANDAMENTO" -> statusEntrega.isEmAndamento();
             case "CONCLUIDO" -> statusEntrega.isConcluido();
-            case "CANCELADO" -> statusEntrega.isCancelado();
             default -> statusEntrega.name().equals(filtro);
         };
     }

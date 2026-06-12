@@ -13,7 +13,6 @@
         .shell { padding: 1.25rem 0 2rem; }
         .hero-card, .list-card { background: #fff; border: 0; border-radius: 24px; box-shadow: 0 10px 35px rgba(0,0,0,0.05); }
         .hero-card { padding: 1.25rem; }
-        .filters-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
         .delivery-card { border: 1px solid #edf1ed; border-radius: 20px; padding: 1rem; background: #fff; transition: transform .2s ease, box-shadow .2s ease; }
         .delivery-card:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,.05); }
         .delivery-title { font-weight: 700; font-size: 1.05rem; color: #1d1d1d; }
@@ -62,9 +61,6 @@
                     <div class="text-muted">Acompanhe pedidos atribuídos, siga a rota e atualize cada entrega em tempo real.</div>
                 </div>
                 <div class="d-flex flex-wrap gap-2">
-                    <button class="btn btn-soft focus-ring" id="btn-sync-queue" type="button">
-                        <i class="bi bi-arrow-repeat me-1"></i>Sincronizar fila offline
-                    </button>
                     <button class="btn btn-primary-custom focus-ring" id="btn-open-route" type="button">
                         <i class="bi bi-geo-alt-fill me-1"></i>Rota otimizada
                     </button>
@@ -94,39 +90,11 @@
         </div>
 
         <div class="list-card p-4">
-            <div class="filters-grid">
-                <div>
-                    <label class="form-label fw-semibold">Status</label>
-                    <select id="filter-status" class="form-select focus-ring">
-                        <option value="">Todos</option>
-                        <option value="PENDENTE">Pendente</option>
-                        <option value="EM_ANDAMENTO">Em andamento</option>
-                        <option value="CONCLUIDO">Concluído</option>
-                        <option value="CANCELADO">Cancelado</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="form-label fw-semibold">Região</label>
-                    <input id="filter-region" class="form-control focus-ring" placeholder="Centro, Zona Sul, bairro...">
-                </div>
-                <div>
-                    <label class="form-label fw-semibold">Prazo até</label>
-                    <input id="filter-deadline" type="datetime-local" class="form-control focus-ring">
-                </div>
-                <div class="d-flex align-items-end">
-                    <button id="btn-refresh" class="btn btn-outline-secondary w-100 focus-ring" type="button">
-                        <i class="bi bi-arrow-clockwise me-1"></i>Atualizar lista
-                    </button>
-                </div>
-            </div>
 
-            <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
-                <div class="small text-muted" id="sync-hint" aria-live="polite"></div>
-                <div class="small text-muted">GPS via Google Maps, atualização em tempo real via SSE e suporte offline.</div>
-            </div>
+
 
             <div id="delivery-list" class="mt-4">
-                <!-- Pedidos carregados via Thymeleaf (direto do servidor) -->
+                
                 <div th:if="${not #lists.isEmpty(pedidos)}">
                     <div th:each="pedido : ${pedidos}" class="delivery-card mb-3">
                         <div class="d-flex justify-content-between align-items-start mb-2">
@@ -164,7 +132,7 @@
                             <div class="fw-bold text-primary-custom" th:text="'R$ ' + ${pedido.valorTotal}">R$ 50,00</div>
                             
                             <div class="action-wrap">
-                                <!-- Botão Aceitar (apenas se status for PENDENTE) -->
+                                
                                 <form th:if="${pedido.statusEntrega.name() == 'PENDENTE'}" 
                                       th:action="@{/delivery/order/aceitar}" 
                                       method="post" 
@@ -175,7 +143,7 @@
                                     </button>
                                 </form>
                                 
-                                <!-- Botão Iniciar Rota (apenas se status for ACEITO) -->
+                                
                                 <form th:if="${pedido.statusEntrega.name() == 'ACEITO'}" 
                                       th:action="@{/delivery/order/iniciar-rota}" 
                                       method="post" 
@@ -186,7 +154,7 @@
                                     </button>
                                 </form>
                                 
-                                <!-- Botão Chegou ao Destino (apenas se status for EM_ROTA) -->
+                                
                                 <form th:if="${pedido.statusEntrega.name() == 'EM_ROTA'}" 
                                       th:action="@{/delivery/order/chegada-destino}" 
                                       method="post" 
@@ -197,7 +165,7 @@
                                     </button>
                                 </form>
                                 
-                                <!-- Botão Finalizar (apenas se status for CHEGOU_DESTINO) -->
+                                
                                 <form th:if="${pedido.statusEntrega.name() == 'CHEGOU_DESTINO'}" 
                                       th:action="@{/delivery/order/finalizar}" 
                                       method="post" 
@@ -208,7 +176,7 @@
                                     </button>
                                 </form>
                                 
-                                <!-- Botão Reportar Problema (exceto se já estiver entregue ou cancelado) -->
+                                
                                 <form th:if="${pedido.statusEntrega.name() != 'ENTREGUE' && pedido.statusEntrega.name() != 'CANCELADO'}" 
                                       th:action="@{/delivery/order/reportar-problema}" 
                                       method="post" 
@@ -224,7 +192,7 @@
                     </div>
                 </div>
                 
-                <!-- Estado vazio -->
+                
                 <div th:if="${#lists.isEmpty(pedidos)}" class="empty-state">
                     <i class="bi bi-inboxes fs-1 d-block mb-2"></i>
                     <div class="fw-semibold">Nenhuma entrega encontrada</div>

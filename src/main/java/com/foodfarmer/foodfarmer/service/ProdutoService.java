@@ -84,7 +84,23 @@ public class ProdutoService {
 
     public void excluirProduto(Long id) {
         if (id != null) {
-            produtoRepository.deleteById(id);
+            Optional<Produto> produtoOpt = produtoRepository.findById(id);
+            if (produtoOpt.isPresent()) {
+                Produto produto = produtoOpt.get();
+                produto.setAtivo(false);
+                produtoRepository.save(produto);
+            }
+        }
+    }
+
+    public void reativarProduto(Long id) {
+        if (id != null) {
+            Optional<Produto> produtoOpt = produtoRepository.findById(id);
+            if (produtoOpt.isPresent()) {
+                Produto produto = produtoOpt.get();
+                produto.setAtivo(true);
+                produtoRepository.save(produto);
+            }
         }
     }
 

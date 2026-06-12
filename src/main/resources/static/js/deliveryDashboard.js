@@ -99,21 +99,7 @@
     }
 
     function buildQuery() {
-        const params = new URLSearchParams();
-        const status = qs('filter-status')?.value?.trim();
-        const region = qs('filter-region')?.value?.trim();
-        const deadline = qs('filter-deadline')?.value;
-
-        if (status) {
-            params.set('status', status);
-        }
-        if (region) {
-            params.set('regiao', region);
-        }
-        if (deadline) {
-            params.set('prazoAntesDe', new Date(deadline).toISOString().slice(0, 19));
-        }
-        return params.toString() ? `?${params}` : '';
+        return '';
     }
 
     function getAddressLine(delivery) {
@@ -457,9 +443,7 @@
             }
         });
 
-        qs('filter-status')?.addEventListener('change', loadDeliveries);
-        qs('filter-region')?.addEventListener('input', debounce(loadDeliveries, 350));
-        qs('filter-deadline')?.addEventListener('change', loadDeliveries);
+
 
         window.addEventListener('online', () => {
             updateConnectivityUi();

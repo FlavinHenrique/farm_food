@@ -234,16 +234,11 @@
 <body>
 
     <div class="wrapper">
-        <!-- Sidebar -->
+        
         <div class="sidebar">
             <a href="/" class="sidebar-brand">FarmFood</a>
             
             <ul class="nav-menu">
-                <li class="nav-item">
-                    <a th:href="@{/producer/dashboard}" class="nav-link">
-                        <i class="bi bi-grid-fill"></i> Dashboard
-                    </a>
-                </li>
                 <li class="nav-item">
                     <a th:href="@{/producer/stores}" class="nav-link active">
                         <i class="bi bi-shop"></i> Minhas lojas
@@ -255,7 +250,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a th:href="@{/producer/vendas}" class="nav-link">
                         <i class="bi bi-bar-chart-line-fill"></i> Vendas
                     </a>
                 </li>
@@ -269,11 +264,6 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="bi bi-gear-fill"></i> Configurações
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a th:href="@{/logout}" class="nav-link">
                             <i class="bi bi-box-arrow-right"></i> Sair
                         </a>
@@ -282,7 +272,7 @@
             </div>
         </div>
 
-        <!-- Main Content -->
+        
         <div class="main-content">
             <header class="top-header">
                 <h1 class="page-title">Minhas Lojas</h1>
@@ -292,7 +282,7 @@
             </header>
 
             <div class="stores-grid">
-                <!-- Store Cards Loop -->
+                
                 <div class="store-card" th:each="store : ${stores}">
                     <div class="store-img-container">
                         <img th:src="${store.urlImagem != null && !store.urlImagem.empty ? store.urlImagem : 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=400'}" class="store-img" alt="Loja">
@@ -313,7 +303,7 @@
                     </div>
                 </div>
 
-                <!-- Empty State -->
+                
                 <div class="empty-state" th:if="${#lists.isEmpty(stores)}">
                     <i class="bi bi-shop empty-icon"></i>
                     <h3 class="fw-bold">Nenhuma loja cadastrada</h3>

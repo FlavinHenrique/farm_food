@@ -55,7 +55,7 @@
 </head>
 <body>
 
-    <!-- Navbar -->
+    
     <nav class="navbar navbar-expand-lg sticky-top bg-white shadow-sm">
         <div class="container">
             <a class="navbar-brand" th:href="@{/}">Farm Food</a>
@@ -91,7 +91,7 @@
 
     <div class="container mb-5">
         <div class="row g-4">
-            <!-- Store Cards Loop -->
+            
             <div class="col-md-4" th:each="store : ${stores}">
                 <div class="store-card card h-100">
                     <img th:src="${store.urlImagem}" class="store-img-top" th:alt="${store.nome}">
@@ -110,7 +110,7 @@
                 </div>
             </div>
 
-            <!-- Empty State -->
+            
             <div th:if="${#lists.isEmpty(stores)}" class="text-center py-5">
                 <i class="bi bi-shop fs-1 text-muted mb-3 d-block"></i>
                 <p class="text-muted">Nenhum produtor cadastrado no momento.</p>
@@ -118,7 +118,7 @@
         </div>
     </div>
 
-    <!-- Footer -->
+    
     <footer class="footer py-5 mt-5 bg-white border-top" id="footer-info">
         <div class="container">
             <div class="row">
@@ -136,7 +136,8 @@
                 </div>
                 <div class="col-lg-3 mb-4">
                     <h5 class="fw-bold mb-4">Contato</h5>
-                    <p class="text-muted small mb-1"><i class="bi bi-geo-alt me-2"></i> Rua do Campo, 123</p>
+                    <p class="text-muted small mb-1"><i class="bi bi-geo-alt me-2"></i> Av. Eng Miguel Gemma, 675</p>
+                    <p class="text-muted small mb-1"><i class="bi bi-telephone me-2"></i> (11) 96440-2932</p>
                     <p class="text-muted small"><i class="bi bi-envelope me-2"></i> contato@foodfarmer.com</p>
                 </div>
             </div>
