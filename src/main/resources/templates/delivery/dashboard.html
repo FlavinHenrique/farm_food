@@ -46,6 +46,7 @@
                 <span id="offline-indicator" class="offline-pill bg-success-subtle text-success">
                     <i class="bi bi-wifi"></i> Online
                 </span>
+                <a th:href="@{/delivery/available}" class="text-decoration-none text-dark fw-semibold">Disponíveis</a>
                 <a th:href="@{/delivery/history}" class="text-decoration-none text-dark fw-semibold">Histórico</a>
                 <a th:href="@{/logout}" class="text-decoration-none text-muted">Sair</a>
             </div>
@@ -74,19 +75,19 @@
                 <div class="col-md-4">
                     <div class="kpi">
                         <div class="text-muted small">Pendentes</div>
-                        <div class="h4 fw-bold mb-0" id="kpi-pending">0</div>
+                        <div class="h4 fw-bold mb-0" th:text="${#lists.size(pedidos.?[statusEntrega.name() == 'PENDENTE'])}">0</div>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="kpi">
                         <div class="text-muted small">Em andamento</div>
-                        <div class="h4 fw-bold mb-0" id="kpi-progress">0</div>
+                        <div class="h4 fw-bold mb-0" th:text="${#lists.size(pedidos.?[statusEntrega.isEmAndamento()])}">0</div>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="kpi">
                         <div class="text-muted small">Concluídas hoje</div>
-                        <div class="h4 fw-bold mb-0" id="kpi-done">0</div>
+                        <div class="h4 fw-bold mb-0" th:text="${#lists.size(pedidos.?[statusEntrega.isConcluido()])}">0</div>
                     </div>
                 </div>
             </div>
@@ -124,11 +125,111 @@
                 <div class="small text-muted">GPS via Google Maps, atualização em tempo real via SSE e suporte offline.</div>
             </div>
 
-            <div id="delivery-list" class="mt-4"></div>
-            <div id="delivery-empty" class="empty-state d-none">
-                <i class="bi bi-inboxes fs-1 d-block mb-2"></i>
-                <div class="fw-semibold">Nenhuma entrega encontrada</div>
-                <div class="small">Ajuste os filtros ou aguarde novas atribuições.</div>
+            <div id="delivery-list" class="mt-4">
+                <!-- Pedidos carregados via Thymeleaf (direto do servidor) -->
+                <div th:if="${not #lists.isEmpty(pedidos)}">
+                    <div th:each="pedido : ${pedidos}" class="delivery-card mb-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="delivery-title">
+                                Pedido #<span th:text="${pedido.id}">123</span> - 
+                                <span th:text="${pedido.loja.nome}">Loja</span>
+                            </div>
+                            <div class="status-pill">
+                                <span th:if="${pedido.statusEntrega.name() == 'PENDENTE'}" class="bg-warning-subtle text-warning" th:text="${pedido.statusEntrega}">Pendente</span>
+                                <span th:if="${pedido.statusEntrega.name() == 'ACEITO'}" class="bg-info-subtle text-info" th:text="${pedido.statusEntrega}">Aceito</span>
+                                <span th:if="${pedido.statusEntrega.name() == 'EM_ROTA'}" class="bg-primary-subtle text-primary" th:text="${pedido.statusEntrega}">Em Rota</span>
+                                <span th:if="${pedido.statusEntrega.name() == 'CHEGOU_DESTINO'}" class="bg-info-subtle text-info" th:text="${pedido.statusEntrega}">Chegou</span>
+                                <span th:if="${pedido.statusEntrega.name() == 'ENTREGUE'}" class="bg-success-subtle text-success" th:text="${pedido.statusEntrega}">Entregue</span>
+                                <span th:if="${pedido.statusEntrega.name() == 'PROBLEMA'}" class="bg-danger-subtle text-danger" th:text="${pedido.statusEntrega}">Problema</span>
+                                <span th:if="${pedido.statusEntrega.name() == 'CANCELADO'}" class="bg-secondary-subtle text-secondary" th:text="${pedido.statusEntrega}">Cancelado</span>
+                            </div>
+                        </div>
+                        
+                        <div class="meta-line mb-2">
+                            <i class="bi bi-person me-1"></i> Cliente: <span th:text="${pedido.cliente.nome}">Cliente</span>
+                        </div>
+                        
+                        <div class="meta-line mb-2">
+                            <i class="bi bi-geo-alt me-1"></i>
+                            <span th:text="${pedido.logradouroEntrega} + ', ' + ${pedido.numeroEntrega}">Endereço</span>
+                            <span th:if="${not #strings.isEmpty(pedido.complementoEntrega)}"> - <span th:text="${pedido.complementoEntrega}"></span></span>
+                            <span th:text="' - ' + ${pedido.bairroEntrega} + ', ' + ${pedido.cidadeEntrega}"></span>
+                        </div>
+                        
+                        <div class="meta-line mb-2">
+                            <i class="bi bi-clock me-1"></i> Prazo: <span th:text="${#temporals.format(pedido.prazoEntrega, 'dd/MM HH:mm')}">01/01 12:00</span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="fw-bold text-primary-custom" th:text="'R$ ' + ${pedido.valorTotal}">R$ 50,00</div>
+                            
+                            <div class="action-wrap">
+                                <!-- Botão Aceitar (apenas se status for PENDENTE) -->
+                                <form th:if="${pedido.statusEntrega.name() == 'PENDENTE'}" 
+                                      th:action="@{/delivery/order/aceitar}" 
+                                      method="post" 
+                                      style="display:inline;">
+                                    <input type="hidden" name="pedidoId" th:value="${pedido.id}">
+                                    <button type="submit" class="btn btn-sm btn-primary-custom focus-ring">
+                                        <i class="bi bi-check-circle me-1"></i>Aceitar
+                                    </button>
+                                </form>
+                                
+                                <!-- Botão Iniciar Rota (apenas se status for ACEITO) -->
+                                <form th:if="${pedido.statusEntrega.name() == 'ACEITO'}" 
+                                      th:action="@{/delivery/order/iniciar-rota}" 
+                                      method="post" 
+                                      style="display:inline;">
+                                    <input type="hidden" name="pedidoId" th:value="${pedido.id}">
+                                    <button type="submit" class="btn btn-sm btn-primary-custom focus-ring">
+                                        <i class="bi bi-truck me-1"></i>Iniciar Rota
+                                    </button>
+                                </form>
+                                
+                                <!-- Botão Chegou ao Destino (apenas se status for EM_ROTA) -->
+                                <form th:if="${pedido.statusEntrega.name() == 'EM_ROTA'}" 
+                                      th:action="@{/delivery/order/chegada-destino}" 
+                                      method="post" 
+                                      style="display:inline;">
+                                    <input type="hidden" name="pedidoId" th:value="${pedido.id}">
+                                    <button type="submit" class="btn btn-sm btn-info text-white focus-ring">
+                                        <i class="bi bi-geo-alt me-1"></i>Chegou
+                                    </button>
+                                </form>
+                                
+                                <!-- Botão Finalizar (apenas se status for CHEGOU_DESTINO) -->
+                                <form th:if="${pedido.statusEntrega.name() == 'CHEGOU_DESTINO'}" 
+                                      th:action="@{/delivery/order/finalizar}" 
+                                      method="post" 
+                                      style="display:inline;">
+                                    <input type="hidden" name="pedidoId" th:value="${pedido.id}">
+                                    <button type="submit" class="btn btn-sm btn-success focus-ring">
+                                        <i class="bi bi-check-circle-fill me-1"></i>Finalizar
+                                    </button>
+                                </form>
+                                
+                                <!-- Botão Reportar Problema (exceto se já estiver entregue ou cancelado) -->
+                                <form th:if="${pedido.statusEntrega.name() != 'ENTREGUE' && pedido.statusEntrega.name() != 'CANCELADO'}" 
+                                      th:action="@{/delivery/order/reportar-problema}" 
+                                      method="post" 
+                                      style="display:inline;">
+                                    <input type="hidden" name="pedidoId" th:value="${pedido.id}">
+                                    <input type="hidden" name="ocorrencia" value="Problema na entrega">
+                                    <button type="submit" class="btn btn-sm btn-danger focus-ring">
+                                        <i class="bi bi-exclamation-triangle me-1"></i>Problema
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Estado vazio -->
+                <div th:if="${#lists.isEmpty(pedidos)}" class="empty-state">
+                    <i class="bi bi-inboxes fs-1 d-block mb-2"></i>
+                    <div class="fw-semibold">Nenhuma entrega encontrada</div>
+                    <div class="small">Ajuste os filtros ou aguarde novas atribuições.</div>
+                </div>
             </div>
         </div>
     </div>

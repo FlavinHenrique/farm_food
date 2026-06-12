@@ -1,5 +1,7 @@
 package com.foodfarmer.foodfarmer.controller;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.foodfarmer.foodfarmer.model.Usuario;
+import com.foodfarmer.foodfarmer.model.PapelUsuario;
 import com.foodfarmer.foodfarmer.service.AutenticacaoService;
 import com.foodfarmer.foodfarmer.service.UsuarioService;
 
@@ -74,11 +77,26 @@ public class UsuarioController {
     @PostMapping("/register/delivery")
     public String registerDelivery(@ModelAttribute("user") Usuario user, Model model) {
         try {
-            Usuario salvo = usuarioService.registrarEntregador(user);
+            Optional<Usuario> usuarioExistente = usuarioService.findByEmail(user.getEmail());
+            Usuario salvo;
+            
+            if (usuarioExistente.isPresent()) {
+                Usuario usuario = usuarioExistente.get();
+                usuario.setPapel(PapelUsuario.ENTREGADOR);
+                usuario.setNome(user.getNome());
+                if (user.getSenha() != null && !user.getSenha().isEmpty()) {
+                    usuario.setSenha(user.getSenha());
+                }
+                salvo = usuarioService.atualizar(usuario);
+            } else {
+                salvo = usuarioService.registrarEntregador(user);
+            }
+            
             autenticacaoService.login(salvo);
-            return "redirect:/delivery/dashboard?registered=true";
+            return "redirect:/delivery/available?registered=true";
         } catch (Exception e) {
-            model.addAttribute("error", "Este e-mail jÃ¡ estÃ¡ cadastrado.");
+            e.printStackTrace(); // Mostra o erro completo no console
+            model.addAttribute("error", "Erro: " + e.getMessage());
             return "register-delivery";
         }
     }

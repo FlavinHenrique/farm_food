@@ -151,10 +151,10 @@
             actions.push(buttonMarkup('Cancelar', 'bi bi-x-circle', 'btn btn-outline-dark btn-sm js-status-action', 'CANCELADO', delivery.id));
         }
 
-        const mapsQuery = encodeURIComponent(getAddressLine(delivery));
+        // Botão para abrir a rota para esta entrega
         actions.push(
-            `<a class="btn btn-soft btn-sm" target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/?api=1&query=${mapsQuery}">` +
-            `<i class="bi bi-map me-1"></i>Navegar</a>`
+            `<button type="button" class="btn btn-soft btn-sm js-open-route" data-id="${delivery.id}">` +
+            `<i class="bi bi-map me-1"></i>Navegar</button>`
         );
         return actions.join('');
     }
@@ -292,6 +292,14 @@
         await sendStatusUpdate(deliveryId, payload);
         showToast('Status da entrega atualizado com sucesso.');
         await loadDeliveries();
+
+        // Se o status for ACEITO ou EM_ROTA, abre a rota automaticamente
+        if (status === 'ACEITO' || status === 'EM_ROTA') {
+            const delivery = deliveries.find(d => d.id === deliveryId);
+            if (delivery) {
+                openRouteForDelivery(delivery);
+            }
+        }
     }
 
     async function syncOfflineQueue() {
@@ -312,6 +320,15 @@
         }
         updateConnectivityUi();
         await loadDeliveries();
+    }
+
+    function openRouteForDelivery(delivery) {
+        if (!delivery) {
+            showToast('Entrega nao encontrada.');
+            return;
+        }
+
+        window.location.href = '/delivery/route/' + delivery.id;
     }
 
     function openOptimizedRoute() {
@@ -342,7 +359,22 @@
         if (waypoints) {
             url.searchParams.set('waypoints', waypoints);
         }
-        window.open(url.toString(), '_blank', 'noopener');
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const origin = `${position.coords.latitude},${position.coords.longitude}`;
+                    url.searchParams.set('origin', origin);
+                    window.open(url.toString(), '_blank', 'noopener');
+                },
+                (error) => {
+                    console.warn('Geolocation error:', error);
+                    window.open(url.toString(), '_blank', 'noopener');
+                }
+            );
+        } else {
+            window.open(url.toString(), '_blank', 'noopener');
+        }
     }
 
     function handleStatusAction(event) {
@@ -411,6 +443,20 @@
         });
         qs('btn-open-route')?.addEventListener('click', openOptimizedRoute);
         qs('delivery-list')?.addEventListener('click', handleStatusAction);
+
+        // Evento para abrir a rota de uma entrega específica
+        qs('delivery-list')?.addEventListener('click', (event) => {
+            const button = event.target.closest('.js-open-route');
+            if (!button) {
+                return;
+            }
+            const deliveryId = Number(button.dataset.id);
+            const delivery = deliveries.find(d => d.id === deliveryId);
+            if (delivery) {
+                openRouteForDelivery(delivery);
+            }
+        });
+
         qs('filter-status')?.addEventListener('change', loadDeliveries);
         qs('filter-region')?.addEventListener('input', debounce(loadDeliveries, 350));
         qs('filter-deadline')?.addEventListener('change', loadDeliveries);

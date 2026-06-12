@@ -82,7 +82,10 @@ public class HomeController {
         model.addAttribute("categories", produtoService.getTodasCategorias());
         
         java.util.List<Produto> products;
-        if (categoriaId != null) {
+        if (search != null && !search.trim().isEmpty()) {
+            products = produtoService.buscarProdutosPorNome(search);
+            model.addAttribute("searchTerm", search);
+        } else if (categoriaId != null) {
             products = produtoService.getProdutosPorCategoria(categoriaId);
             model.addAttribute("selectedCategoryId", categoriaId);
         } else {
@@ -158,5 +161,11 @@ public class HomeController {
         model.addAttribute("addresses", clienteService.getEnderecosPorUsuario(usuario));
         
         return "checkout";
+    }
+
+    @GetMapping("/faq")
+    public String faq(Model model) {
+        model.addAttribute("isLoggedIn", autenticacaoService.estaLogado());
+        return "faq";
     }
 }

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rota de Entrega - Farm Food</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        body {
+            background-color: var(--light-gray, #f9f9f9);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .map-container {
+            flex-grow: 1;
+            width: 100%;
+            min-height: 500px;
+        }
+        .map-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar bg-white border-bottom sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary-custom" th:href="@{/delivery/dashboard}">
+                <i class="bi bi-arrow-left me-2"></i>Voltar
+            </a>
+            <h5 class="mb-0 fw-bold">Rota para Pedido #<span th:text="${pedido.id}"></span></h5>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="p-4 bg-white rounded-3 shadow-sm">
+                    <h6 class="fw-bold mb-2"><i class="bi bi-geo-alt text-primary-custom me-2"></i>Endereço de Entrega</h6>
+                    <p class="mb-0">
+                        <span th:text="${pedido.logradouroEntrega} + ', ' + ${pedido.numeroEntrega}"></span>
+                        <span th:if="${not #strings.isEmpty(pedido.complementoEntrega)}"> - <span th:text="${pedido.complementoEntrega}"></span></span>
+                        <span th:text="' - ' + ${pedido.bairroEntrega} + ', ' + ${pedido.cidadeEntrega} + ' - ' + ${pedido.estadoEntrega}"></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="map-container">
+            <div id="map-placeholder" class="d-flex align-items-center justify-content-center h-100 bg-light rounded-3">
+                <div class="text-center">
+                    <i class="bi bi-geo-alt fs-1 text-muted"></i>
+                    <p class="text-muted mt-2">Carregando rota...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const pedidoId = /*[[${pedido.id}]]*/ '';
+        const logradouro = /*[[${pedido.logradouroEntrega}]]*/ '';
+        const numero = /*[[${pedido.numeroEntrega}]]*/ '';
+        const bairro = /*[[${pedido.bairroEntrega}]]*/ '';
+        const cidade = /*[[${pedido.cidadeEntrega}]]*/ '';
+        const estado = /*[[${pedido.estadoEntrega}]]*/ '';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const destination = [logradouro, numero, bairro, cidade, estado].filter(Boolean).join(', ');
+            const mapContainer = document.getElementById('map-placeholder');
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const origin = `${position.coords.latitude},${position.coords.longitude}`;
+                        const mapsUrl = `https://www.google.com/maps/embed/v1/directions?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&mode=driving`;
+                        mapContainer.innerHTML = `<iframe src="${mapsUrl}" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+                    },
+                    (error) => {
+                        console.warn('Geolocation error:', error);
+                        const mapsUrl = `https://www.google.com/maps/embed/v1/directions?destination=${encodeURIComponent(destination)}&mode=driving`;
+                        mapContainer.innerHTML = `<iframe src="${mapsUrl}" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+                    }
+                );
+            } else {
+                const mapsUrl = `https://www.google.com/maps/embed/v1/directions?destination=${encodeURIComponent(destination)}&mode=driving`;
+                mapContainer.innerHTML = `<iframe src="${mapsUrl}" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+            }
+        });
+    </script>
+</body>
+</html>

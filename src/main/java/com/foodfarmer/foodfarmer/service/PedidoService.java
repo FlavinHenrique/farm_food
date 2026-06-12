@@ -1,13 +1,6 @@
 package com.foodfarmer.foodfarmer.service;
 
-import com.foodfarmer.foodfarmer.model.Endereco;
-import com.foodfarmer.foodfarmer.model.ItemPedido;
-import com.foodfarmer.foodfarmer.model.Loja;
-import com.foodfarmer.foodfarmer.model.PapelUsuario;
-import com.foodfarmer.foodfarmer.model.Pedido;
-import com.foodfarmer.foodfarmer.model.Produto;
-import com.foodfarmer.foodfarmer.model.StatusEntrega;
-import com.foodfarmer.foodfarmer.model.Usuario;
+import com.foodfarmer.foodfarmer.model.*;
 import com.foodfarmer.foodfarmer.repository.ProdutoRepository;
 import com.foodfarmer.foodfarmer.repository.PedidoRepository;
 import com.foodfarmer.foodfarmer.repository.UsuarioRepository;
@@ -34,14 +27,16 @@ public class PedidoService {
     private final UsuarioRepository usuarioRepository;
     private final ClienteService clienteService;
     private final EntregadorNotificationService entregadorNotificationService;
+    private final PagamentoService pagamentoService;
 
     public PedidoService(PedidoRepository pedidoRepository, ProdutoRepository produtoRepository, UsuarioRepository usuarioRepository,
-            ClienteService clienteService, EntregadorNotificationService entregadorNotificationService) {
+            ClienteService clienteService, EntregadorNotificationService entregadorNotificationService, PagamentoService pagamentoService) {
         this.pedidoRepository = pedidoRepository;
         this.produtoRepository = produtoRepository;
         this.usuarioRepository = usuarioRepository;
         this.clienteService = clienteService;
         this.entregadorNotificationService = entregadorNotificationService;
+        this.pagamentoService = pagamentoService;
     }
 
     public List<Pedido> getPedidosPorLojas(List<Loja> lojas) {
@@ -50,6 +45,10 @@ public class PedidoService {
 
     public List<Pedido> getPedidosPorCliente(Usuario cliente) {
         return pedidoRepository.findByClienteOrderByDataPedidoDesc(cliente);
+    }
+
+    public Pedido getPedidoPorId(Long pedidoId) {
+        return pedidoRepository.findById(pedidoId).orElse(null);
     }
 
     public BigDecimal calcularFaturamentoTotal(List<Pedido> pedidos) {
@@ -79,7 +78,7 @@ public class PedidoService {
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado: " + itemRequest.productId()));
 
             int quantidade = Math.max(1, Optional.ofNullable(itemRequest.quantity()).orElse(1));
-            BigDecimal precoUnitario = Optional.ofNullable(produto.getPreco()).orElse(BigDecimal.ZERO);
+            BigDecimal precoUnitario = produto.getPrecoComDesconto();
             BigDecimal subtotal = precoUnitario.multiply(BigDecimal.valueOf(quantidade));
             subtotalGeral = subtotalGeral.add(subtotal);
 
@@ -114,17 +113,29 @@ public class PedidoService {
             pedido.setDataPedido(LocalDateTime.now());
             pedido.setStatus("Pendente");
             pedido.setStatusEntrega(StatusEntrega.PENDENTE);
+            pedido.setStatusPagamento(StatusPagamento.PENDENTE);
             pedido.setPrazoEntrega(LocalDateTime.now().plusHours(4 + index));
             pedido.setValorFrete(fretePedido.max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP));
+            pedido.setValorProdutos(subtotalLoja.setScale(2, RoundingMode.HALF_UP));
+            pedido.setValorDesconto(descontoPedido.max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP));
 
             preencherEnderecoEntrega(pedido, cliente, request);
-            pedido.setEntregador(escolherEntregador(pedido.getRegiaoEntrega()));
+            // Não atribui entregador automaticamente - pedido fica disponível para pegar
 
             BigDecimal valorTotal = subtotalLoja.add(pedido.getValorFrete()).subtract(descontoPedido.max(BigDecimal.ZERO));
             if (valorTotal.signum() < 0) {
                 valorTotal = BigDecimal.ZERO;
             }
             pedido.setValorTotal(valorTotal.setScale(2, RoundingMode.HALF_UP));
+
+            // Define método de pagamento
+            TipoMetodoPagamento tipoMetodo = TipoMetodoPagamento.PIX;
+            if (request.metodoPagamento() != null) {
+                try {
+                    tipoMetodo = TipoMetodoPagamento.valueOf(request.metodoPagamento().toUpperCase());
+                } catch (IllegalArgumentException ignored) {}
+            }
+            pedido.setTipoMetodoPagamento(tipoMetodo);
 
             List<ItemPedido> itensPedido = itens.stream().map(item -> {
                 ItemPedido itemPedido = new ItemPedido();
@@ -137,11 +148,11 @@ public class PedidoService {
             pedido.setItens(itensPedido);
             Pedido saved = pedidoRepository.save(pedido);
             pedidos.add(saved);
+
+            // Cria transação para o pedido
+            pagamentoService.criarTransacao(saved, tipoMetodo);
             freteDistribuido = freteDistribuido.add(pedido.getValorFrete() == null ? BigDecimal.ZERO : pedido.getValorFrete());
             descontoDistribuido = descontoDistribuido.add(descontoPedido.max(BigDecimal.ZERO));
-            if (saved.getEntregador() != null && saved.getEntregador().getId() != null) {
-                entregadorNotificationService.send(saved.getEntregador().getId(), "novo-pedido", new DeliveryNotification(saved.getId(), "Novo pedido atribuído", saved.getStatusEntrega() == null ? "PENDENTE" : saved.getStatusEntrega().name()));
-            }
             index++;
         }
 
@@ -150,6 +161,10 @@ public class PedidoService {
         }
 
         return pedidos;
+    }
+
+    public List<Pedido> listarPedidosDisponiveis() {
+        return pedidoRepository.findByEntregadorIsNullAndStatusEntregaOrderByDataPedidoDesc(StatusEntrega.PENDENTE);
     }
 
     public List<Pedido> listarPedidosEntregador(Usuario entregador, String filtroStatus, String regiao, LocalDateTime prazoAntesDe, boolean somenteHistorico) {
@@ -162,6 +177,29 @@ public class PedidoService {
             .filter(p -> prazoAntesDe == null || (p.getPrazoEntrega() != null && !p.getPrazoEntrega().isAfter(prazoAntesDe)))
             .sorted(Comparator.comparing(Pedido::getPrazoEntrega, Comparator.nullsLast(Comparator.naturalOrder())))
             .toList();
+    }
+
+    @Transactional
+    public Pedido aceitarPedidoDisponivel(Usuario entregador, Long pedidoId) {
+        Pedido pedido = pedidoRepository.findById(pedidoId)
+            .orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
+
+        if (pedido.getEntregador() != null) {
+            throw new IllegalArgumentException("Este pedido já foi aceito por outro entregador.");
+        }
+        if (pedido.getStatusEntrega() != StatusEntrega.PENDENTE) {
+            throw new IllegalArgumentException("Este pedido não está disponível para aceitar.");
+        }
+
+        pedido.setEntregador(entregador);
+        pedido.setStatusEntrega(StatusEntrega.ACEITO);
+        pedido.setStatus("Aceito para entrega");
+
+        Pedido saved = pedidoRepository.save(pedido);
+        if (saved.getEntregador() != null && saved.getEntregador().getId() != null) {
+            entregadorNotificationService.send(saved.getEntregador().getId(), "pedido-aceito", new DeliveryNotification(saved.getId(), "Pedido aceito!", saved.getStatusEntrega().name()));
+        }
+        return saved;
     }
 
     @Transactional
@@ -202,6 +240,7 @@ public class PedidoService {
             case ENTREGUE -> {
                 pedido.setStatus("Finalizado");
                 pedido.setEntregueEm(agora);
+                pagamentoService.liberarRepasseProdutor(pedido.getId());
             }
             case PROBLEMA -> pedido.setStatus("Problema na entrega");
             case CANCELADO -> pedido.setStatus("Cancelado");

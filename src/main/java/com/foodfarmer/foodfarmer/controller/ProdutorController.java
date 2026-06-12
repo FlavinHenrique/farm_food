@@ -18,6 +18,7 @@ import com.foodfarmer.foodfarmer.service.AutenticacaoService;
 import com.foodfarmer.foodfarmer.service.LojaService;
 import com.foodfarmer.foodfarmer.service.PedidoService;
 import com.foodfarmer.foodfarmer.service.ProdutoService;
+import com.foodfarmer.foodfarmer.service.UsuarioService;
 
 @Controller
 @RequestMapping("/producer")
@@ -27,13 +28,15 @@ public class ProdutorController {
     private final ProdutoService produtoService;
     private final AutenticacaoService autenticacaoService;
     private final PedidoService pedidoService;
+    private final UsuarioService usuarioService;
 
     public ProdutorController(LojaService lojaService, ProdutoService produtoService, 
-                            AutenticacaoService autenticacaoService, PedidoService pedidoService) {
+                            AutenticacaoService autenticacaoService, PedidoService pedidoService, UsuarioService usuarioService) {
         this.lojaService = lojaService;
         this.produtoService = produtoService;
         this.autenticacaoService = autenticacaoService;
         this.pedidoService = pedidoService;
+        this.usuarioService = usuarioService;
     }
 
     @GetMapping("/dashboard")
@@ -91,6 +94,38 @@ public class ProdutorController {
         model.addAttribute("stores", lojas);
         model.addAttribute("products", produtos);
         return "producer/products";
+    }
+
+    @GetMapping("/profile")
+    public String showProfile(Model model) {
+        if (!autenticacaoService.estaLogado()) return "redirect:/login";
+        Usuario produtor = autenticacaoService.getUsuarioAtual().get();
+        model.addAttribute("produtor", produtor);
+        return "producer/profile";
+    }
+
+    @PostMapping("/profile/save")
+    public String saveProfile(@ModelAttribute Usuario produtor, @RequestParam(required = false) String newPassword) {
+        if (!autenticacaoService.estaLogado()) return "redirect:/login";
+        Usuario currentUser = autenticacaoService.getUsuarioAtual().get();
+        
+        // Atualizar os campos
+        currentUser.setNome(produtor.getNome());
+        currentUser.setNomeEmpresa(produtor.getNomeEmpresa());
+        currentUser.setCpf(produtor.getCpf());
+        currentUser.setCnpj(produtor.getCnpj());
+        currentUser.setTelefone(produtor.getTelefone());
+        currentUser.setUrlFotoPerfil(produtor.getUrlFotoPerfil());
+        currentUser.setUrlFotoCapa(produtor.getUrlFotoCapa());
+        currentUser.setEmail(produtor.getEmail());
+        
+        // Atualizar senha se fornecida
+        if (newPassword != null && !newPassword.isBlank()) {
+            currentUser.setSenha(newPassword);
+        }
+        
+        usuarioService.atualizar(currentUser);
+        return "redirect:/producer/profile";
     }
 
     @GetMapping("/store/new")

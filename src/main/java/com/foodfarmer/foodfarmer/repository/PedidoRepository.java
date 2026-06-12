@@ -19,4 +19,5 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     List<Pedido> findByEntregadorAndStatusEntregaOrderByPrazoEntregaAsc(Usuario entregador, StatusEntrega statusEntrega);
     List<Pedido> findByEntregadorAndRegiaoEntregaContainingIgnoreCaseOrderByPrazoEntregaAsc(Usuario entregador, String regiaoEntrega);
     List<Pedido> findByEntregadorAndPrazoEntregaBeforeOrderByPrazoEntregaAsc(Usuario entregador, LocalDateTime prazoEntrega);
+    List<Pedido> findByEntregadorIsNullAndStatusEntregaOrderByDataPedidoDesc(StatusEntrega statusEntrega);
 }

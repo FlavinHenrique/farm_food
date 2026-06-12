@@ -60,6 +60,10 @@
                     <li class="nav-item"><a class="nav-link" href="#footer-info">Contato</a></li>
                 </ul>
                 <div class="d-flex align-items-center gap-3">
+                    <form th:action="@{/produtos}" method="GET" class="d-flex align-items-center bg-light rounded-pill px-3 py-1" style="max-width: 250px;">
+                        <input type="text" name="search" class="form-control form-control-sm border-0 bg-transparent shadow-none" placeholder="Buscar produtos..." th:value="${searchTerm}">
+                        <button type="submit" class="btn btn-link text-dark p-0"><i class="bi bi-search"></i></button>
+                    </form>
                     <a th:if="${isLoggedIn}" th:href="@{/customer/profile}" class="text-dark"><i class="bi bi-person fs-5"></i></a>
                     <a th:if="${!isLoggedIn}" th:href="@{/login}" class="btn btn-primary-custom btn-sm">Entrar</a>
                     <a th:href="@{/cart}" class="text-dark position-relative d-flex align-items-center justify-content-center" style="text-decoration: none;">
@@ -112,7 +116,11 @@
                                     <h5 class="card-title fw-bold" th:text="${product.nome}">Nome do Produto</h5>
                                     <div class="d-flex justify-content-between align-items-center mt-3">
                                         <span class="btn btn-sm btn-success rounded-pill px-3">Ver detalhes</span>
-                                        <span class="fw-bold text-success" th:text="'R$ ' + ${product.preco}">R$ 0,00</span>
+                                        <div th:if="${product.emPromocao}" class="d-flex gap-2 align-items-center">
+                                            <span class="text-decoration-line-through text-muted small" th:text="'R$ ' + ${product.preco}">R$ 10,00</span>
+                                            <span class="fw-bold text-success" th:text="'R$ ' + ${product.precoComDesconto}">R$ 8,00</span>
+                                        </div>
+                                        <span th:unless="${product.emPromocao}" class="fw-bold text-success" th:text="'R$ ' + ${product.preco}">R$ 0,00</span>
                                     </div>
                                 </div>
                             </div>

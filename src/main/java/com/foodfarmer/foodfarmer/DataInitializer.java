@@ -47,56 +47,124 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (usuarioRepository.count() == 0) {
-            Usuario producer = usuarioRepository.save(new Usuario(null, "Produtor Exemplo", "produtor@farmfood.com", "123", "00.000.000/0001-91", PapelUsuario.PRODUTOR, null));
-            Usuario customer = usuarioRepository.save(new Usuario(null, "Maria Silva", "cliente@farmfood.com", "123", null, PapelUsuario.CLIENTE, null));
-            Usuario courier = usuarioRepository.save(new Usuario(null, "Diego Entregas", "entregador@farmfood.com", "123", null, PapelUsuario.ENTREGADOR, null));
+        // Criação de dados apenas se o banco estiver completamente vazio
+        boolean needSeedData = usuarioRepository.count() == 0;
 
-            Categoria legumes = categoriaRepository.save(new Categoria(null, "Legumes", "bi-carrot"));
-            Categoria frutas = categoriaRepository.save(new Categoria(null, "Frutas", "bi-apple"));
+        Usuario producer;
+        Usuario customer;
+        Usuario courier;
+        Loja store = null;
+        Categoria legumes = null;
+        Categoria frutas = null;
+        Produto cebola = null;
+        Produto brocolis = null;
+        Produto maca = null;
 
-            Loja store = lojaRepository.save(new Loja(
+        if (needSeedData) {
+            // Cria todos os dados do zero
+            producer = usuarioRepository.save(new Usuario(
+                null, 
+                "Produtor Exemplo", 
+                "Fazenda do Zé", 
+                null, 
+                "00.000.000/0001-91", 
+                null, 
+                null, 
+                null, 
+                "produtor@farmfood.com", 
+                "123", 
+                PapelUsuario.PRODUTOR, 
+                true, 
+                null
+            ));
+            customer = usuarioRepository.save(new Usuario(
+                null, 
+                "Maria Silva", 
+                null, 
+                null, 
+                null, 
+                null, 
+                null, 
+                null, 
+                "cliente@farmfood.com", 
+                "123", 
+                PapelUsuario.CLIENTE, 
+                true, 
+                null
+            ));
+            courier = usuarioRepository.save(new Usuario(
+                null, 
+                "Diego Entregas", 
+                null, 
+                null, 
+                null, 
+                null, 
+                null, 
+                null, 
+                "entregador@farmfood.com", 
+                "123", 
+                PapelUsuario.ENTREGADOR, 
+                true, 
+                null
+            ));
+
+            legumes = categoriaRepository.save(new Categoria(null, "Legumes", "bi-carrot"));
+            frutas = categoriaRepository.save(new Categoria(null, "Frutas", "bi-apple"));
+
+            store = lojaRepository.save(new Loja(
                 null,
                 "Horta do Ze",
                 "Produtos frescos direto do produtor",
                 "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=200",
+                "Hortifruti",
+                "Rua das Flores, 123 - São Paulo/SP",
+                "(11) 99999-9999",
+                "Seg-Sex: 08:00-18:00",
+                true,
+                true,
                 producer,
                 null
             ));
 
-            Produto cebola = produtoRepository.save(new Produto(
+            cebola = produtoRepository.save(new Produto(
                 null,
                 "Cebola Roxa",
                 "Cebola roxa fresca e selecionada",
                 new BigDecimal("5.50"),
                 "https://images.unsplash.com/photo-1508747703725-719777637510?auto=format&fit=crop&q=80&w=400",
                 "kg",
+                100,
                 true,
                 10,
+                true,
                 legumes,
                 store
             ));
-            Produto brocolis = produtoRepository.save(new Produto(
+            brocolis = produtoRepository.save(new Produto(
                 null,
                 "Brocolis Organico",
                 "Brocolis ninja colhido no dia",
                 new BigDecimal("8.00"),
                 "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&q=80&w=400",
                 "un",
+                50,
                 false,
                 0,
+                true,
                 legumes,
                 store
             ));
-            Produto maca = produtoRepository.save(new Produto(
+            maca = produtoRepository.save(new Produto(
                 null,
                 "Maca Fuji",
                 "Fruta doce para consumo diario",
                 new BigDecimal("11.90"),
                 "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?auto=format&fit=crop&q=80&w=400",
                 "kg",
+                80,
                 false,
                 0,
+                true,
                 frutas,
                 store
             ));
@@ -113,15 +181,32 @@ public class DataInitializer implements CommandLineRunner {
                 "01001000",
                 customer
             ));
+        } else {
+            // Recupera dados existentes
+            producer = usuarioRepository.findByPapel(PapelUsuario.PRODUTOR).stream().findFirst().orElse(null);
+            customer = usuarioRepository.findByPapel(PapelUsuario.CLIENTE).stream().findFirst().orElse(null);
+            courier = usuarioRepository.findByPapel(PapelUsuario.ENTREGADOR).stream().findFirst().orElse(null);
+        }
 
-            if (pedidoRepository.count() == 0) {
-                pedidoRepository.save(criarPedidoSeed(customer, store, courier, cebola, 2, "Centro", StatusEntrega.PENDENTE, 3, null));
-                pedidoRepository.save(criarPedidoSeed(customer, store, courier, brocolis, 3, "Zona Sul", StatusEntrega.EM_ROTA, 1, null));
-                pedidoRepository.save(criarPedidoSeed(customer, store, courier, maca, 1, "Moema", StatusEntrega.ENTREGUE, -5, LocalDateTime.now().minusHours(2)));
+        // Cria pedidos de teste apenas se NÃO houver nenhum pedido e tivermos todos os dados necessários
+        if (pedidoRepository.count() == 0 && producer != null && customer != null && courier != null) {
+            // Tenta recuperar loja e produtos existentes se não foram criados agora
+            if (store == null) {
+                store = lojaRepository.findByDono(producer).stream().findFirst().orElse(null);
+            }
+
+            if (store != null) {
+                if (cebola == null) {
+                    cebola = produtoRepository.findByLoja(store).stream().findFirst().orElse(null);
+                }
+
+                if (cebola != null) {
+                    pedidoRepository.save(criarPedidoSeed(customer, store, courier, cebola, 2, "Centro", StatusEntrega.PENDENTE, 3, null));
+                }
             }
         }
 
-        System.out.println("Aplicacao iniciada. Dados iniciais do Farm Food verificados.");
+        System.out.println("Aplicacao iniciada. Dados iniciais do Farm Food verificados (banco não resetado!).");
     }
 
     private Pedido criarPedidoSeed(Usuario customer, Loja store, Usuario courier, Produto product, int quantity,
@@ -144,7 +229,11 @@ public class DataInitializer implements CommandLineRunner {
         pedido.setEstadoEntrega("SP");
         pedido.setValorFrete(new BigDecimal("12.90"));
 
-        BigDecimal subtotal = product.getPreco().multiply(BigDecimal.valueOf(quantity));
+        BigDecimal subtotal = product.getPrecoComDesconto().multiply(BigDecimal.valueOf(quantity));
+        pedido.setValorProdutos(subtotal);
+        pedido.setValorDesconto(BigDecimal.ZERO);
+        pedido.setStatusPagamento(com.foodfarmer.foodfarmer.model.StatusPagamento.PAGO);
+        pedido.setTipoMetodoPagamento(com.foodfarmer.foodfarmer.model.TipoMetodoPagamento.PIX);
         pedido.setValorTotal(subtotal.add(pedido.getValorFrete()));
 
         if (deliveryStatus == StatusEntrega.EM_ROTA || deliveryStatus == StatusEntrega.CHEGOU_DESTINO || deliveryStatus == StatusEntrega.ENTREGUE) {
